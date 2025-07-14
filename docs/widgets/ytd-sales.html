@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YTD Sales Performance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .widget {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .widget-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .designer-name {
+            font-size: 18px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        
+        .metric-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: #2d3748;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            background: #f7fafc;
+            border-radius: 15px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            border-radius: 15px;
+            transition: width 1.5s ease-in-out;
+            box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+        }
+        
+        .goal-text {
+            font-size: 16px;
+            color: #4a5568;
+            margin-top: 15px;
+        }
+        
+        .goal-amount {
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .last-updated {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        .setup-required {
+            background: #fff5f5;
+            border: 2px dashed #fc8181;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .setup-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .setup-instructions {
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: left;
+            margin-top: 15px;
+        }
+        
+        .setup-code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .loading {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget" id="widget">
+        <div class="setup-required">
+            <div class="setup-title">🔧 Setup Required</div>
+            <p>This widget needs configuration to display live data.</p>
+            <div class="setup-instructions">
+                <strong>Step 1:</strong> Update the configuration below:<br>
+                <div class="setup-code">
+                    const GHL_API_KEY = "YOUR_GHL_API_KEY_HERE";<br>
+                    const GHL_LOCATION_ID = "YOUR_LOCATION_ID_HERE";<br>
+                    const PROXY_URL = "https://your-proxy.vercel.app/api/ghl-proxy";
+                </div>
+                <strong>Step 2:</strong> Deploy your Vercel proxy<br>
+                <strong>Step 3:</strong> Commit changes to GitHub
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ CONFIGURATION REQUIRED
+        const GHL_API_KEY = "YOUR_GHL_API_KEY_HERE";
+        const GHL_LOCATION_ID = "YOUR_LOCATION_ID_HERE";  
+        const PROXY_URL = "https://your-proxy.vercel.app/api/ghl-proxy";
+        
+        // Check if configuration is complete
+        const isConfigured = GHL_API_KEY !== "YOUR_GHL_API_KEY_HERE" && 
+                           GHL_LOCATION_ID !== "YOUR_LOCATION_ID_HERE" && 
+                           PROXY_URL !== "https://your-proxy.vercel.app/api/ghl-proxy";
+        
+        // Get designer from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const designer = urlParams.get('designer') || 'All Designers';
+        
+        async function loadSalesData() {
+            if (!isConfigured) {
+                console.log('Widget requires configuration');
+                return;
+            }
+            
+            try {
+                const now = new Date();
+                const startOfYear = `${now.getFullYear()}-01-01`;
+                
+                // Fetch opportunities through your proxy
+                const response = await fetch(`${PROXY_URL}?endpoint=opportunities&location_id=${GHL_LOCATION_ID}&startDate=${startOfYear}`, {
+                    headers: {
+                        'Authorization': `Bearer ${GHL_API_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const opportunities = data.opportunities || [];
+                
+                // Calculate YTD revenue from won opportunities
+                const ytdRevenue = opportunities
+                    .filter(opp => opp.status === 'won')
+                    .reduce((total, opp) => {
+                        return total + (parseFloat(opp.monetary_value) || 0);
+                    }, 0);
+                
+                // Example annual goal - you can make this dynamic
+                const annualGoal = 500000; // $500K goal
+                const progressPercentage = (ytdRevenue / annualGoal) * 100;
+                
+                // Update the widget with real data
+                document.getElementById('widget').innerHTML = `
+                    <div class="widget-title">YTD Sales Performance</div>
+                    <div class="designer-name">${designer}</div>
+                    <div class="metric-value">$${ytdRevenue.toLocaleString()}</div>
+                    <div class="metric-label">Year to Date Revenue</div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${Math.min(progressPercentage, 100)}%"></div>
+                    </div>
+                    <div class="goal-text">
+                        <span class="goal-amount">${progressPercentage.toFixed(1)}%</span> of 
+                        <span class="goal-amount">$${annualGoal.toLocaleString()}</span> annual goal
+                    </div>
+                    <div class="last-updated">Last updated: ${new Date().toLocaleTimeString()}</div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('widget').innerHTML = `
+                    <div class="setup-required">
+                        <div class="setup-title">⚠️ Connection Error</div>
+                        <p>Unable to load sales data. Check your configuration:</p>
+                        <div class="setup-instructions">
+                            • Verify your GHL API key is correct<br>
+                            • Check your Location ID<br>
+                            • Ensure your Vercel proxy is deployed<br>
+                            • Make sure you have opportunities in GHL with status "won"
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load data when page loads
+        if (isConfigured) {
+            loadSalesData();
+            // Refresh every 5 minutes
+            setInterval(loadSalesData, 5 * 60 * 1000);
+        }
+    </script>
+</body>
+</html>
