@@ -1,0 +1,12 @@
+.widget {
+  font-family: sans-serif;
+  padding: 1em;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  width: 200px;
+  text-align: center;
+}
+.value {
+  font-size: 2em;
+  margin-top: 0.5em;
+}
