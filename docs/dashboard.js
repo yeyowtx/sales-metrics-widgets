@@ -3,7 +3,7 @@
 
 const API_BASE_URL = 'https://services.leadconnectorhq.com';
 const LOCATION_ID = 'zGb4qzUMN6KTFiW4WArQ'; // Your location ID
-const API_TOKEN = 'YOUR_API_TOKEN_HERE'; // Replace with your actual token
+const API_TOKEN = 'pit-30f24e77-d624-4226-92d7-2e1232a94a8e';
 
 // FIXED: Get ALL opportunities (no pipeline filtering)
 async function getAllOpportunities() {
