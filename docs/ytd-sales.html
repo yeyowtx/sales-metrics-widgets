@@ -1,160 +1,257 @@
-// Configuration
-const CONFIG = {
-    API_BASE: 'https://raspy-firefly-102f.laurencio.workers.dev',
-    LOCATION_ID: 'zGb4qzUMN6KTFiW4WArQ',
-    API_KEY: 'pit-30f24e77-d624-4226-92d7-2e1232a94a8e'
-};
-
-async function loadDashboard() {
-    const loadingEl = document.getElementById('loading');
-    const errorEl = document.getElementById('error');
-    const dashboardEl = document.getElementById('dashboard');
-
-    // Show loading
-    loadingEl.style.display = 'block';
-    errorEl.style.display = 'none';
-    dashboardEl.style.display = 'none';
-
-    try {
-        // Fetch opportunities data
-        const response = await fetch(`${CONFIG.API_BASE}/?endpoint=opportunities&location_id=${CONFIG.LOCATION_ID}`, {
-            headers: {
-                'Authorization': `Bearer ${CONFIG.API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YTD Sales Performance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        const data = await response.json();
-
-        if (!data.success) {
-            throw new Error('Failed to load opportunities data');
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
         }
 
-        // Process and display data
-        displayDashboard(data.data.opportunities || []);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-    } catch (error) {
-        console.error('Dashboard Error:', error);
-        showError(error.message);
-    }
-}
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
 
-function displayDashboard(opportunities) {
-    const loadingEl = document.getElementById('loading');
-    const dashboardEl = document.getElementById('dashboard');
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-    // Hide loading, show dashboard
-    loadingEl.style.display = 'none';
-    dashboardEl.style.display = 'block';
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
 
-    // Filter to only "1. New Lead Pipeline" opportunities
-    const pipelineOpportunities = opportunities.filter(opp => 
-        opp.pipelineId && opp.pipelineId.includes('NewLead') || 
-        (opp.pipeline && opp.pipeline.includes('New Lead')) ||
-        // Fallback - if we can't identify pipeline, include all for now
-        true
-    );
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
 
-    // Calculate stats for New Lead Pipeline only
-    const totalOpportunities = pipelineOpportunities.length;
-    const wonOpportunities = pipelineOpportunities.filter(opp => opp.status === 'won').length;
-    const openOpportunities = pipelineOpportunities.filter(opp => opp.status === 'open').length;
-    const lostOpportunities = pipelineOpportunities.filter(opp => opp.status === 'lost').length;
-    
-    // Calculate values
-    const pipelineValue = pipelineOpportunities
-        .filter(opp => opp.status === 'open')
-        .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-    
-    const wonRevenue = pipelineOpportunities
-        .filter(opp => opp.status === 'won')
-        .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-        
-    const winRate = totalOpportunities > 0 ? (wonOpportunities / totalOpportunities) * 100 : 0;
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-    // Update stats
-    document.getElementById('totalOpportunities').textContent = totalOpportunities;
-    document.getElementById('totalValue').textContent = formatCurrency(pipelineValue);
-    document.getElementById('openOpportunities').textContent = wonOpportunities;
-    document.getElementById('avgValue').textContent = `${winRate.toFixed(1)}%`;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
 
-    // Display opportunities (filter to New Lead Pipeline and show recent)
-    displayOpportunities(pipelineOpportunities);
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    // Update timestamp
-    document.getElementById('lastUpdated').textContent = 
-        `Last updated: ${new Date().toLocaleString()} | Showing: 1. New Lead Pipeline (${totalOpportunities} total, ${wonOpportunities} won, ${openOpportunities} open)`;
-}
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
 
-function displayOpportunities(opportunities) {
-    const container = document.getElementById('opportunitiesList');
-    
-    if (opportunities.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No opportunities found</p>';
-        return;
-    }
+        .opportunities-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-    container.innerHTML = opportunities.slice(0, 10).map(opp => `
-        <div class="opportunity-card">
-            <div class="opportunity-name">${opp.name || 'Unnamed Opportunity'}</div>
-            <div class="opportunity-details">
-                <div class="detail-item">
-                    <span class="detail-label">Value:</span>
-                    <span class="detail-value">${formatCurrency(opp.monetaryValue || 0)}</span>
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .opportunity-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .opportunity-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .opportunity-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .opportunity-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #2d3748;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .status-open {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-closed {
+            background: #38a169;
+            color: white;
+        }
+
+        .status-lost {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .last-updated {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 YTD Sales Performance</h1>
+            <p>Real-time pipeline insights powered by GHL API</p>
+        </header>
+
+        <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Data</button>
+
+        <div id="loading" class="loading">
+            <div>Loading your sales data...</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="dashboard" style="display: none;">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalOpportunities">0</div>
+                    <div class="stat-label">Total Opportunities</div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value status-${opp.status}">${opp.status || 'unknown'}</span>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalValue">$0</div>
+                    <div class="stat-label">Pipeline Value</div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Contact:</span>
-                    <span class="detail-value">${opp.contact?.name || 'No contact'}</span>
+                <div class="stat-card">
+                    <div class="stat-number" id="openOpportunities">0</div>
+                    <div class="stat-label">Open Opportunities</div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email:</span>
-                    <span class="detail-value">${opp.contact?.email || 'No email'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Created:</span>
-                    <span class="detail-value">${formatDate(opp.createdAt)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Updated:</span>
-                    <span class="detail-value">${formatDate(opp.updatedAt)}</span>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgValue">$0</div>
+                    <div class="stat-label">Average Deal Size</div>
                 </div>
             </div>
+
+            <!-- Opportunities List -->
+            <div class="opportunities-section">
+                <h2 class="section-title">📋 Recent Opportunities</h2>
+                <div id="opportunitiesList"></div>
+            </div>
         </div>
-    `).join('');
-}
 
-function showError(message) {
-    const loadingEl = document.getElementById('loading');
-    const errorEl = document.getElementById('error');
-    
-    loadingEl.style.display = 'none';
-    errorEl.style.display = 'block';
-    errorEl.textContent = `Error loading dashboard: ${message}`;
-}
+        <div class="last-updated" id="lastUpdated"></div>
+    </div>
 
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(amount);
-}
-
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    });
-}
-
-// Load dashboard on page load
-document.addEventListener('DOMContentLoaded', loadDashboard);
+    <script src="dashboard.js"></script>
+</body>
+</html>
