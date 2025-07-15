@@ -1,299 +1,24 @@
-// Add this to your dashboard JavaScript to fix the loading screen
+// dashboard.js - Complete Dashboard JavaScript
 
-function updateDashboard(opportunities, metrics) {
-    console.log('🎨 Updating dashboard with', opportunities.length, 'opportunities');
+console.log('🚀 Dashboard script loading...');
+
+// Global variables
+let allOpportunities = [];
+let dashboardMetrics = {};
+
+// Main function to load dashboard
+async function loadDashboard() {
+    console.log('📡 Starting dashboard load...');
     
     try {
-        // FIRST: Hide the loading screen
-        hideLoadingScreen();
+        // Update API status
+        updateAPIStatus('worker-status', 'loading');
+        updateAPIStatus('api-status', 'loading');
+        updateAPIStatus('pagination-status', 'loading');
         
-        // Show the main dashboard content
-        showDashboardContent();
-        
-        // Update total count in multiple possible locations
-        updateTotalCount(opportunities.length);
-        
-        // Update status breakdown
-        updateStatusDisplay(metrics.statuses);
-        
-        // Update pipeline display
-        updatePipelineDisplay(metrics.pipelines);
-        
-        // Create or update opportunities table
-        createOpportunitiesTable(opportunities.slice(0, 20));
-        
-        console.log('✅ Dashboard updated successfully!');
-        
-    } catch (error) {
-        console.error('❌ Error updating dashboard:', error);
-        showError(error.message);
-    }
-}
-
-function hideLoadingScreen() {
-    // Hide loading messages
-    const loadingElements = document.querySelectorAll(
-        '.loading, [class*="loading"], ' +
-        'h2:contains("Loading"), h3:contains("Loading"), ' +
-        'div:contains("Loading your sales data"), ' +
-        'p:contains("Loading")'
-    );
-    
-    // Also try text-based search
-    const allElements = document.querySelectorAll('*');
-    allElements.forEach(el => {
-        if (el.textContent && el.textContent.includes('Loading your sales data')) {
-            el.style.display = 'none';
-            console.log('🫥 Hid loading element:', el.textContent);
-        }
-    });
-    
-    loadingElements.forEach(el => {
-        el.style.display = 'none';
-        console.log('🫥 Hid loading element');
-    });
-}
-
-function showDashboardContent() {
-    // Show any hidden dashboard content
-    const contentElements = document.querySelectorAll(
-        '.dashboard-content, .main-content, .content, ' +
-        '#dashboard, #main, #content, .dashboard'
-    );
-    
-    contentElements.forEach(el => {
-        el.style.display = 'block';
-        el.style.visibility = 'visible';
-    });
-    
-    console.log('👀 Showed dashboard content');
-}
-
-function updateTotalCount(total) {
-    const totalSelectors = [
-        '#total-opportunities', '#total-count', '.total-opportunities',
-        '.total-count', '[data-total]', '.opportunity-count'
-    ];
-    
-    let updated = false;
-    totalSelectors.forEach(selector => {
-        const element = document.querySelector(selector);
-        if (element) {
-            element.textContent = total;
-            updated = true;
-            console.log(`✅ Updated ${selector} with total: ${total}`);
-        }
-    });
-    
-    if (!updated) {
-        // Create a total display if none exists
-        createTotalDisplay(total);
-    }
-}
-
-function createTotalDisplay(total) {
-    // Create a prominent total display
-    const totalDiv = document.createElement('div');
-    totalDiv.innerHTML = `
-        <div style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            margin: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        ">
-            <h1 style="margin: 0; font-size: 3em;">${total}</h1>
-            <p style="margin: 10px 0 0 0; font-size: 1.2em;">Total Opportunities</p>
-        </div>
-    `;
-    
-    // Insert at the top of the page
-    const body = document.body;
-    const firstChild = body.children[0];
-    body.insertBefore(totalDiv, firstChild);
-    
-    console.log('🎯 Created total display:', total);
-}
-
-function updateStatusDisplay(statuses) {
-    let statusElement = document.querySelector('#status-chart, .status-chart, #status-breakdown');
-    
-    if (!statusElement) {
-        statusElement = document.createElement('div');
-        statusElement.id = 'status-breakdown';
-        statusElement.style.cssText = `
-            background: white;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        `;
-        document.body.appendChild(statusElement);
-    }
-    
-    let html = '<h2>Status Breakdown</h2>';
-    
-    for (const [status, count] of Object.entries(statuses)) {
-        const total = Object.values(statuses).reduce((a, b) => a + b, 0);
-        const percentage = ((count / total) * 100).toFixed(1);
-        
-        // Color-code statuses
-        let color = '#6c757d'; // default gray
-        if (status === 'open') color = '#28a745';
-        if (status === 'won') color = '#007bff';
-        if (status === 'lost') color = '#dc3545';
-        
-        html += `
-            <div style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 12px;
-                margin: 8px 0;
-                background: ${color}15;
-                border-left: 4px solid ${color};
-                border-radius: 4px;
-            ">
-                <span style="font-weight: bold; text-transform: capitalize;">${status}</span>
-                <span style="color: ${color}; font-weight: bold;">${count} (${percentage}%)</span>
-            </div>
-        `;
-    }
-    
-    statusElement.innerHTML = html;
-    console.log('📊 Updated status display');
-}
-
-function updatePipelineDisplay(pipelines) {
-    let pipelineElement = document.querySelector('#pipeline-chart, .pipeline-chart, #pipeline-breakdown');
-    
-    if (!pipelineElement) {
-        pipelineElement = document.createElement('div');
-        pipelineElement.id = 'pipeline-breakdown';
-        pipelineElement.style.cssText = `
-            background: white;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        `;
-        document.body.appendChild(pipelineElement);
-    }
-    
-    let html = '<h2>Pipeline Breakdown</h2>';
-    
-    for (const [pipelineId, count] of Object.entries(pipelines)) {
-        html += `
-            <div style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px;
-                margin: 6px 0;
-                background: #f8f9fa;
-                border-radius: 4px;
-            ">
-                <span>Pipeline ${pipelineId.substring(0, 8)}...</span>
-                <strong>${count} opportunities</strong>
-            </div>
-        `;
-    }
-    
-    pipelineElement.innerHTML = html;
-    console.log('📈 Updated pipeline display');
-}
-
-function createOpportunitiesTable(opportunities) {
-    let tableElement = document.querySelector('#opportunities-table, .opportunities-table');
-    
-    if (!tableElement) {
-        tableElement = document.createElement('div');
-        tableElement.id = 'opportunities-table';
-        tableElement.style.cssText = `
-            background: white;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        `;
-        document.body.appendChild(tableElement);
-    }
-    
-    let html = '<h2>Recent Opportunities</h2>';
-    html += '<div style="overflow-x: auto;">';
-    html += `
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: #f8f9fa;">
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Name</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Value</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
-                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Contact</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    opportunities.forEach(opp => {
-        const value = opp.monetaryValue ? `$${opp.monetaryValue.toLocaleString()}` : 'N/A';
-        const contact = opp.contact?.name || 'Unknown';
-        
-        html += `
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px;">${opp.name || 'Untitled'}</td>
-                <td style="padding: 12px;">${value}</td>
-                <td style="padding: 12px;">
-                    <span style="
-                        padding: 4px 8px;
-                        border-radius: 4px;
-                        font-size: 12px;
-                        font-weight: bold;
-                        color: white;
-                        background: ${opp.status === 'open' ? '#28a745' : opp.status === 'won' ? '#007bff' : '#dc3545'};
-                    ">${opp.status}</span>
-                </td>
-                <td style="padding: 12px;">${contact}</td>
-            </tr>
-        `;
-    });
-    
-    html += '</tbody></table></div>';
-    html += `<p style="color: #6c757d; margin-top: 15px;">Showing first ${opportunities.length} opportunities</p>`;
-    
-    tableElement.innerHTML = html;
-    console.log('📋 Created opportunities table');
-}
-
-function showError(message) {
-    hideLoadingScreen();
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.innerHTML = `
-        <div style="
-            background: #f8d7da;
-            color: #721c24;
-            padding: 20px;
-            margin: 20px;
-            border: 1px solid #f5c6cb;
-            border-radius: 8px;
-        ">
-            <h3>⚠️ Error Loading Dashboard</h3>
-            <p>${message}</p>
-        </div>
-    `;
-    
-    document.body.insertBefore(errorDiv, document.body.firstChild);
-}
-
-// Override the existing getAllOpportunities to use this new updateDashboard
-async function getAllOpportunities() {
-    console.log('🚀 Starting to fetch opportunities...');
-    
-    try {
+        // Fetch data from CloudFlare Worker
         const workerUrl = 'https://raspy-firefly-102f.laurencio.workers.dev';
-        console.log('📡 Calling worker:', workerUrl);
+        console.log('🔗 Calling worker:', workerUrl);
         
         const response = await fetch(workerUrl);
         console.log('📥 Response status:', response.status);
@@ -303,51 +28,297 @@ async function getAllOpportunities() {
         }
         
         const data = await response.json();
-        console.log('✅ Worker response:', data);
+        console.log('✅ Worker response received:', data);
         
+        // Validate response structure
         if (!data || !data.success || !data.opportunities) {
-            throw new Error('Invalid response format');
+            throw new Error('Invalid response format from worker');
         }
         
-        const opportunities = data.opportunities;
-        const metrics = data.metrics || calculateMetrics(opportunities);
+        // Store the data
+        allOpportunities = data.opportunities;
+        dashboardMetrics = data.metrics || calculateMetrics(allOpportunities);
         
-        console.log(`🎯 Found ${opportunities.length} opportunities`);
+        console.log(`🎯 Found ${allOpportunities.length} opportunities`);
+        console.log('📊 Metrics:', dashboardMetrics);
         
-        // Use the new updateDashboard function
-        updateDashboard(opportunities, metrics);
+        // Update API status to success
+        updateAPIStatus('worker-status', 'success');
+        updateAPIStatus('api-status', 'success');
+        updateAPIStatus('pagination-status', 'success');
         
-        return opportunities;
+        // Hide loading screen and show dashboard
+        hideLoadingScreen();
+        showDashboard();
+        
+        // Populate dashboard with data
+        updateDashboardContent();
+        
+        console.log('✅ Dashboard loaded successfully!');
         
     } catch (error) {
-        console.error('❌ Error fetching opportunities:', error);
+        console.error('❌ Error loading dashboard:', error);
+        
+        // Update API status to error
+        updateAPIStatus('worker-status', 'error');
+        updateAPIStatus('api-status', 'error');
+        updateAPIStatus('pagination-status', 'error');
+        
+        // Show error
         showError(error.message);
-        return [];
     }
 }
 
+// Calculate metrics from opportunities
 function calculateMetrics(opportunities) {
     const metrics = {
         total: opportunities.length,
         statuses: {},
-        pipelines: {}
+        pipelines: {},
+        assignedTo: {}
     };
     
     opportunities.forEach(opp => {
+        // Count by status
         if (opp.status) {
             metrics.statuses[opp.status] = (metrics.statuses[opp.status] || 0) + 1;
         }
+        
+        // Count by pipeline
         if (opp.pipelineId) {
             metrics.pipelines[opp.pipelineId] = (metrics.pipelines[opp.pipelineId] || 0) + 1;
+        }
+        
+        // Count by assigned person
+        if (opp.assignedTo) {
+            metrics.assignedTo[opp.assignedTo] = (metrics.assignedTo[opp.assignedTo] || 0) + 1;
         }
     });
     
     return metrics;
 }
 
-// Auto-start when page loads
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', getAllOpportunities);
-} else {
-    getAllOpportunities();
+// Hide loading screen
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+        console.log('🫥 Loading screen hidden');
+    }
 }
+
+// Show dashboard content
+function showDashboard() {
+    const dashboardContent = document.getElementById('dashboard-content');
+    if (dashboardContent) {
+        dashboardContent.style.display = 'block';
+        console.log('👀 Dashboard content shown');
+    }
+}
+
+// Update dashboard content with data
+function updateDashboardContent() {
+    console.log('🎨 Updating dashboard content...');
+    
+    // Update total opportunities
+    updateTotalOpportunities();
+    
+    // Update status breakdown
+    updateStatusBreakdown();
+    
+    // Update pipeline breakdown
+    updatePipelineBreakdown();
+    
+    // Update opportunities table
+    updateOpportunitiesTable();
+    
+    // Update last updated time
+    updateLastUpdated();
+}
+
+// Update total opportunities display
+function updateTotalOpportunities() {
+    const totalElement = document.getElementById('total-opportunities');
+    if (totalElement) {
+        totalElement.textContent = dashboardMetrics.total;
+        console.log(`✅ Updated total: ${dashboardMetrics.total}`);
+    }
+}
+
+// Update status breakdown
+function updateStatusBreakdown() {
+    const statuses = dashboardMetrics.statuses;
+    const total = dashboardMetrics.total;
+    
+    // Update each status
+    Object.keys(statuses).forEach(status => {
+        const count = statuses[status];
+        const percentage = ((count / total) * 100).toFixed(1);
+        
+        // Update count
+        const countElement = document.getElementById(`${status}-count`);
+        if (countElement) {
+            countElement.textContent = count;
+        }
+        
+        // Update percentage
+        const percentageElement = document.getElementById(`${status}-percentage`);
+        if (percentageElement) {
+            percentageElement.textContent = `${percentage}%`;
+        }
+    });
+    
+    console.log('📊 Status breakdown updated');
+}
+
+// Update pipeline breakdown
+function updatePipelineBreakdown() {
+    const pipelineList = document.getElementById('pipeline-list');
+    if (!pipelineList) return;
+    
+    const pipelines = dashboardMetrics.pipelines;
+    let html = '';
+    
+    Object.entries(pipelines).forEach(([pipelineId, count]) => {
+        html += `
+            <div class="pipeline-item">
+                <span class="pipeline-name">Pipeline ${pipelineId.substring(0, 8)}...</span>
+                <span class="pipeline-count">${count}</span>
+            </div>
+        `;
+    });
+    
+    pipelineList.innerHTML = html;
+    console.log('📈 Pipeline breakdown updated');
+}
+
+// Update opportunities table
+function updateOpportunitiesTable() {
+    const tableContainer = document.getElementById('opportunities-table');
+    if (!tableContainer) return;
+    
+    // Show first 20 opportunities
+    const recentOpportunities = allOpportunities.slice(0, 20);
+    
+    let html = `
+        <table class="opportunities-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                    <th>Contact</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    recentOpportunities.forEach(opp => {
+        const value = opp.monetaryValue ? `$${opp.monetaryValue.toLocaleString()}` : 'N/A';
+        const contact = opp.contact?.name || 'Unknown';
+        const created = opp.createdAt ? new Date(opp.createdAt).toLocaleDateString() : 'N/A';
+        
+        html += `
+            <tr>
+                <td>${opp.name || 'Untitled'}</td>
+                <td>${value}</td>
+                <td><span class="status-badge ${opp.status}">${opp.status}</span></td>
+                <td>${contact}</td>
+                <td>${created}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+        <p class="table-info">Showing ${recentOpportunities.length} of ${allOpportunities.length} opportunities</p>
+    `;
+    
+    tableContainer.innerHTML = html;
+    console.log('📋 Opportunities table updated');
+}
+
+// Update last updated time
+function updateLastUpdated() {
+    const lastUpdatedElement = document.getElementById('last-updated');
+    if (lastUpdatedElement) {
+        const now = new Date().toLocaleTimeString();
+        lastUpdatedElement.textContent = `Last updated: ${now}`;
+    }
+}
+
+// Update API status indicators
+function updateAPIStatus(statusId, status) {
+    const statusElement = document.getElementById(statusId);
+    if (!statusElement) return;
+    
+    switch (status) {
+        case 'loading':
+            statusElement.textContent = '🟡';
+            break;
+        case 'success':
+            statusElement.textContent = '🟢';
+            break;
+        case 'error':
+            statusElement.textContent = '🔴';
+            break;
+    }
+}
+
+// Show error message
+function showError(message) {
+    console.error('🚨 Showing error:', message);
+    
+    // Hide loading screen
+    hideLoadingScreen();
+    
+    // Show error container
+    const errorContainer = document.getElementById('error-container');
+    const errorMessage = document.getElementById('error-message');
+    
+    if (errorContainer && errorMessage) {
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block';
+    }
+}
+
+// Hide error message
+function hideError() {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.style.display = 'none';
+    }
+}
+
+// Refresh button handler
+function setupRefreshButton() {
+    const refreshButton = document.getElementById('refresh-button');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
+            console.log('🔄 Manual refresh triggered');
+            hideError();
+            loadDashboard();
+        });
+    }
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM loaded, initializing dashboard...');
+    
+    // Setup event listeners
+    setupRefreshButton();
+    
+    // Load dashboard data
+    loadDashboard();
+});
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    console.log('⏰ Auto-refresh triggered');
+    loadDashboard();
+}, 5 * 60 * 1000);
+
+console.log('✅ Dashboard script loaded and ready!');
