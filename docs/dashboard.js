@@ -97,42 +97,56 @@ function displayDashboard(opportunities) {
 function displayOpportunities(opportunities) {
     const container = document.getElementById('opportunitiesList');
     
+    console.log('Displaying opportunities:', opportunities.length, 'opportunities');
+    console.log('First opportunity structure:', opportunities[0]);
+    
     if (opportunities.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No opportunities found</p>';
         return;
     }
 
-    container.innerHTML = opportunities.slice(0, 10).map(opp => `
-        <div class="opportunity-card">
-            <div class="opportunity-name">${opp.name || 'Unnamed Opportunity'}</div>
-            <div class="opportunity-details">
-                <div class="detail-item">
-                    <span class="detail-label">Value:</span>
-                    <span class="detail-value">${formatCurrency(opp.monetaryValue || 0)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value status-${opp.status}">${opp.status || 'unknown'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Contact:</span>
-                    <span class="detail-value">${opp.contact?.name || 'No contact'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email:</span>
-                    <span class="detail-value">${opp.contact?.email || 'No email'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Created:</span>
-                    <span class="detail-value">${formatDate(opp.createdAt)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Updated:</span>
-                    <span class="detail-value">${formatDate(opp.updatedAt)}</span>
+    container.innerHTML = opportunities.slice(0, 10).map(opp => {
+        // Handle different possible data structures
+        const name = opp.name || 'Unnamed Opportunity';
+        const value = opp.monetaryValue || 0;
+        const status = opp.status || 'unknown';
+        const contactName = opp.contact?.name || opp.contactName || 'No contact';
+        const email = opp.contact?.email || opp.email || 'No email';
+        const created = opp.createdAt || opp.created || '';
+        const updated = opp.updatedAt || opp.updated || '';
+        
+        return `
+            <div class="opportunity-card">
+                <div class="opportunity-name">${name}</div>
+                <div class="opportunity-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Value:</span>
+                        <span class="detail-value">${formatCurrency(value)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value status-${status.toLowerCase()}">${status}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Contact:</span>
+                        <span class="detail-value">${contactName}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">${email}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created:</span>
+                        <span class="detail-value">${formatDate(created)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Updated:</span>
+                        <span class="detail-value">${formatDate(updated)}</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function showError(message) {
