@@ -151,8 +151,8 @@
             <div class="setup-instructions">
                 <strong>Step 1:</strong> Update the configuration below:<br>
                 <div class="setup-code">
-                    const GHL_API_KEY = "YOUR_GHL_API_KEY_HERE";<br>
-                    const GHL_LOCATION_ID = "YOUR_LOCATION_ID_HERE";<br>
+                    const GHL_API_KEY = "pit-68f1fb89-0590-4545-ab73-06f028926778";<br>
+                    const GHL_LOCATION_ID = "zGb4qzUMN6KTFiW4WArQ";<br>
                     const PROXY_URL = "https://raspy-firefly-102f.laurencio.workers.dev";
                 </div>
                 <strong>Step 2:</strong> Deploy your Cloudflare Worker<br>
@@ -162,8 +162,8 @@
     </div>
 
     <script>
-        // ⚠️ CONFIGURATION - Updated with your credentials and Cloudflare Worker
-        const GHL_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhdGlvbl9pZCI6InpHYjRxelVNTjZLVEZpVzRXQXJRIiwidmVyc2lvbiI6MSwiaWF0IjoxNzMyNTYzNzE4NjQ4LCJzdWIiOiJrUEh1SkJGQVJ4bENIYlpEemxkNyJ9.3gIgHqFJ-M1i39ndyLzEAlDGy-7uTeiM0H48OGKGfDA";
+        // ⚠️ CONFIGURATION - Updated with new Private Integration token
+        const GHL_API_KEY = "pit-68f1fb89-0590-4545-ab73-06f028926778";
         const GHL_LOCATION_ID = "zGb4qzUMN6KTFiW4WArQ";  
         const PROXY_URL = "https://raspy-firefly-102f.laurencio.workers.dev";
         
@@ -186,7 +186,7 @@
                 const now = new Date();
                 const startOfYear = `${now.getFullYear()}-01-01`;
                 
-                // Fetch opportunities through your Cloudflare Worker
+                // Fetch opportunities through your Cloudflare Worker (API v2.0)
                 const response = await fetch(`${PROXY_URL}?endpoint=opportunities&location_id=${GHL_LOCATION_ID}&startDate=${startOfYear}`, {
                     headers: {
                         'Authorization': `Bearer ${GHL_API_KEY}`
@@ -204,7 +204,7 @@
                 const ytdRevenue = opportunities
                     .filter(opp => opp.status === 'won')
                     .reduce((total, opp) => {
-                        return total + (parseFloat(opp.monetary_value) || 0);
+                        return total + (parseFloat(opp.monetaryValue) || 0);
                     }, 0);
                 
                 // Example annual goal - you can make this dynamic
@@ -234,7 +234,7 @@
                         <div class="setup-title">⚠️ Connection Error</div>
                         <p>Unable to load sales data. Check your configuration:</p>
                         <div class="setup-instructions">
-                            • Verify your GHL API key is correct<br>
+                            • Verify your GHL Private Integration token is correct<br>
                             • Check your Location ID<br>
                             • Ensure your Cloudflare Worker is deployed<br>
                             • Make sure you have opportunities in GHL with status "won"
