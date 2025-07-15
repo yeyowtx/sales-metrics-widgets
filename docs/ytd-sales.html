@@ -3,255 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YTD Sales Performance Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            font-size: 1.1rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .opportunities-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: #333;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .opportunity-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s ease;
-        }
-
-        .opportunity-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .opportunity-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .opportunity-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #4a5568;
-            min-width: 80px;
-        }
-
-        .detail-value {
-            color: #2d3748;
-            background: #e2e8f0;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .status-open {
-            background: #48bb78;
-            color: white;
-        }
-
-        .status-closed {
-            background: #38a169;
-            color: white;
-        }
-
-        .status-lost {
-            background: #e53e3e;
-            color: white;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .error {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .refresh-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .last-updated {
-            text-align: center;
-            color: white;
-            margin-top: 30px;
-            font-style: italic;
-        }
-    </style>
+    <title>🚀 YTD Sales Performance</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>🚀 YTD Sales Performance</h1>
-            <p>Real-time pipeline insights powered by GHL API</p>
-        </header>
+    <header>
+        <h1>🚀 YTD Sales Performance</h1>
+        <p>Real-time pipeline insights powered by GHL API</p>
+    </header>
 
-        <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Data</button>
-
-        <div id="loading" class="loading">
-            <div>Loading your sales data...</div>
+    <main>
+        <!-- Loading Screen (will be hidden by JavaScript) -->
+        <div id="loading-screen">
+            <h2 id="loading-text">Loading your sales data...</h2>
         </div>
 
-        <div id="error" class="error" style="display: none;"></div>
-
-        <div id="dashboard" style="display: none;">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalOpportunities">0</div>
-                    <div class="stat-label">Total Opportunities</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalValue">$0</div>
-                    <div class="stat-label">Pipeline Value</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="openOpportunities">0</div>
-                    <div class="stat-label">Open Opportunities</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="avgValue">$0</div>
-                    <div class="stat-label">Average Deal Size</div>
-                </div>
+        <!-- Dashboard Content (will be shown by JavaScript) -->
+        <div id="dashboard-content" style="display: none;">
+            
+            <!-- Total Opportunities Card -->
+            <div id="total-card" class="metric-card">
+                <h2 id="total-opportunities">0</h2>
+                <p>Total Opportunities</p>
+                <small id="last-updated">Real-time data via GHL API</small>
             </div>
 
-            <!-- Opportunities List -->
-            <div class="opportunities-section">
-                <h2 class="section-title">📋 Recent Opportunities</h2>
-                <div id="opportunitiesList"></div>
-            </div>
+            <!-- Status Breakdown -->
+            <section id="status-section">
+                <h3>📊 Status Breakdown</h3>
+                <div id="status-grid" class="status-grid">
+                    <div id="open-card" class="status-card open">
+                        <div class="status-number" id="open-count">0</div>
+                        <div class="status-label">Open</div>
+                        <div class="status-percentage" id="open-percentage">0%</div>
+                    </div>
+                    <div id="won-card" class="status-card won">
+                        <div class="status-number" id="won-count">0</div>
+                        <div class="status-label">Won</div>
+                        <div class="status-percentage" id="won-percentage">0%</div>
+                    </div>
+                    <div id="lost-card" class="status-card lost">
+                        <div class="status-number" id="lost-count">0</div>
+                        <div class="status-label">Lost</div>
+                        <div class="status-percentage" id="lost-percentage">0%</div>
+                    </div>
+                    <div id="abandoned-card" class="status-card abandoned">
+                        <div class="status-number" id="abandoned-count">0</div>
+                        <div class="status-label">Abandoned</div>
+                        <div class="status-percentage" id="abandoned-percentage">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pipeline Breakdown -->
+            <section id="pipeline-section">
+                <h3>📈 Pipeline Breakdown</h3>
+                <div id="pipeline-list" class="pipeline-list">
+                    <!-- Pipeline items will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Recent Opportunities Table -->
+            <section id="opportunities-section">
+                <h3>📋 Recent Opportunities</h3>
+                <div id="opportunities-table" class="table-container">
+                    <!-- Table will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- API Status -->
+            <section id="api-status-section">
+                <h3>🔗 API Status</h3>
+                <div id="api-status" class="api-status">
+                    <div class="status-item">
+                        <span class="status-indicator" id="worker-status">🟡</span>
+                        <span>CloudFlare Worker</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator" id="api-status">🟡</span>
+                        <span>GHL API Connection</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator" id="pagination-status">🟡</span>
+                        <span>Pagination Status</span>
+                    </div>
+                </div>
+            </section>
+
         </div>
 
-        <div class="last-updated" id="lastUpdated"></div>
-    </div>
+        <!-- Error Display -->
+        <div id="error-container" style="display: none;" class="error-container">
+            <h3>❌ Error</h3>
+            <p id="error-message">Something went wrong...</p>
+            <button id="retry-button" onclick="location.reload()">Retry</button>
+        </div>
 
+        <!-- Refresh Button -->
+        <button id="refresh-button" class="refresh-btn">🔄 Refresh Data</button>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 YTD Sales Performance Dashboard</p>
+    </footer>
+
+    <!-- Load JavaScript -->
     <script src="dashboard.js"></script>
 </body>
 </html>
