@@ -3,253 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YTD Sales Performance</title>
+    <title>YTD Sales Performance Dashboard</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #333;
         }
-        
-        .widget {
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
             background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 400px;
-            width: 100%;
             text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
-        .widget-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 20px;
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-        
-        .designer-name {
-            font-size: 18px;
-            color: #667eea;
             font-weight: 600;
+        }
+
+        .opportunities-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
             margin-bottom: 25px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
         }
-        
-        .metric-value {
-            font-size: 48px;
-            font-weight: 800;
+
+        .opportunity-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .opportunity-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .opportunity-name {
+            font-size: 1.3rem;
+            font-weight: 600;
             color: #2d3748;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 8px;
         }
-        
-        .metric-label {
-            font-size: 14px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
-        }
-        
-        .progress-container {
-            background: #f7fafc;
-            border-radius: 15px;
-            height: 20px;
-            margin: 20px 0;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #48bb78, #38a169);
-            border-radius: 15px;
-            transition: width 1.5s ease-in-out;
-            box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
-        }
-        
-        .goal-text {
-            font-size: 16px;
-            color: #4a5568;
+
+        .opportunity-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-top: 15px;
         }
-        
-        .goal-amount {
-            font-weight: 700;
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4a5568;
+            min-width: 80px;
+        }
+
+        .detail-value {
             color: #2d3748;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
-        
-        .last-updated {
-            font-size: 12px;
-            color: #a0aec0;
-            margin-top: 20px;
-            font-style: italic;
+
+        .status-open {
+            background: #48bb78;
+            color: white;
         }
-        
-        .setup-required {
-            background: #fff5f5;
-            border: 2px dashed #fc8181;
+
+        .status-closed {
+            background: #38a169;
+            color: white;
+        }
+
+        .status-lost {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            background: #fed7d7;
             color: #c53030;
             padding: 20px;
-            border-radius: 15px;
+            border-radius: 12px;
             text-align: center;
+            margin: 20px 0;
         }
-        
-        .setup-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-        
-        .setup-instructions {
-            font-size: 14px;
-            line-height: 1.6;
-            text-align: left;
-            margin-top: 15px;
-        }
-        
-        .setup-code {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 10px;
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
             border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            margin: 10px 0;
-            word-break: break-all;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
         }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        
-        .loading {
-            animation: pulse 2s infinite;
+
+        .last-updated {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="widget" id="widget">
-        <div class="setup-required">
-            <div class="setup-title">🔧 Setup Required</div>
-            <p>This widget needs configuration to display live data.</p>
-            <div class="setup-instructions">
-                <strong>Step 1:</strong> Update the configuration below:<br>
-                <div class="setup-code">
-                    const GHL_API_KEY = "pit-68f1fb89-0590-4545-ab73-06f028926778";<br>
-                    const GHL_LOCATION_ID = "zGb4qzUMN6KTFiW4WArQ";<br>
-                    const PROXY_URL = "https://raspy-firefly-102f.laurencio.workers.dev";
+    <div class="container">
+        <header class="header">
+            <h1>🚀 YTD Sales Performance</h1>
+            <p>Real-time pipeline insights powered by GHL API</p>
+        </header>
+
+        <button class="refresh-btn" onclick="loadDashboard()">🔄 Refresh Data</button>
+
+        <div id="loading" class="loading">
+            <div>Loading your sales data...</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="dashboard" style="display: none;">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalOpportunities">0</div>
+                    <div class="stat-label">Total Opportunities</div>
                 </div>
-                <strong>Step 2:</strong> Deploy your Cloudflare Worker<br>
-                <strong>Step 3:</strong> Commit changes to GitHub
+                <div class="stat-card">
+                    <div class="stat-number" id="totalValue">$0</div>
+                    <div class="stat-label">Pipeline Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="openOpportunities">0</div>
+                    <div class="stat-label">Open Opportunities</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgValue">$0</div>
+                    <div class="stat-label">Average Deal Size</div>
+                </div>
+            </div>
+
+            <!-- Opportunities List -->
+            <div class="opportunities-section">
+                <h2 class="section-title">📋 Recent Opportunities</h2>
+                <div id="opportunitiesList"></div>
             </div>
         </div>
+
+        <div class="last-updated" id="lastUpdated"></div>
     </div>
 
     <script>
-        // ⚠️ CONFIGURATION - Updated with new Private Integration token
-        const GHL_API_KEY = "pit-68f1fb89-0590-4545-ab73-06f028926778";
-        const GHL_LOCATION_ID = "zGb4qzUMN6KTFiW4WArQ";  
-        const PROXY_URL = "https://raspy-firefly-102f.laurencio.workers.dev";
-        
-        // Check if configuration is complete
-        const isConfigured = GHL_API_KEY !== "YOUR_GHL_API_KEY_HERE" && 
-                           GHL_LOCATION_ID !== "YOUR_LOCATION_ID_HERE" && 
-                           PROXY_URL !== "https://your-proxy.vercel.app/api/ghl-proxy";
-        
-        // Get designer from URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const designer = urlParams.get('designer') || 'All Designers';
-        
-        async function loadSalesData() {
-            if (!isConfigured) {
-                console.log('Widget requires configuration');
-                return;
-            }
-            
+        // Configuration
+        const CONFIG = {
+            API_BASE: 'https://raspy-firefly-102f.laurencio.workers.dev',
+            LOCATION_ID: 'zGb4qzUMN6KTFiW4WArQ',
+            API_KEY: 'pit-30f24e77-d624-4226-92d7-2e1232a94a8e'
+        };
+
+        async function loadDashboard() {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const dashboardEl = document.getElementById('dashboard');
+
+            // Show loading
+            loadingEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            dashboardEl.style.display = 'none';
+
             try {
-                const now = new Date();
-                const startOfYear = `${now.getFullYear()}-01-01`;
-                
-                // Fetch opportunities through your Cloudflare Worker (API v2.0)
-                const response = await fetch(`${PROXY_URL}?endpoint=opportunities&location_id=${GHL_LOCATION_ID}&startDate=${startOfYear}`, {
+                // Fetch opportunities data
+                const response = await fetch(`${CONFIG.API_BASE}/?endpoint=opportunities&location_id=${CONFIG.LOCATION_ID}`, {
                     headers: {
-                        'Authorization': `Bearer ${GHL_API_KEY}`
+                        'Authorization': `Bearer ${CONFIG.API_KEY}`,
+                        'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                const opportunities = data.opportunities || [];
-                
-                // Calculate YTD revenue from won opportunities
-                const ytdRevenue = opportunities
-                    .filter(opp => opp.status === 'won')
-                    .reduce((total, opp) => {
-                        return total + (parseFloat(opp.monetaryValue) || 0);
-                    }, 0);
-                
-                // Example annual goal - you can make this dynamic
-                const annualGoal = 500000; // $500K goal
-                const progressPercentage = (ytdRevenue / annualGoal) * 100;
-                
-                // Update the widget with real data
-                document.getElementById('widget').innerHTML = `
-                    <div class="widget-title">YTD Sales Performance</div>
-                    <div class="designer-name">${designer}</div>
-                    <div class="metric-value">$${ytdRevenue.toLocaleString()}</div>
-                    <div class="metric-label">Year to Date Revenue</div>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: ${Math.min(progressPercentage, 100)}%"></div>
-                    </div>
-                    <div class="goal-text">
-                        <span class="goal-amount">${progressPercentage.toFixed(1)}%</span> of 
-                        <span class="goal-amount">$${annualGoal.toLocaleString()}</span> annual goal
-                    </div>
-                    <div class="last-updated">Last updated: ${new Date().toLocaleTimeString()}</div>
-                `;
-                
+
+                if (!data.success) {
+                    throw new Error('Failed to load opportunities data');
+                }
+
+                // Process and display data
+                displayDashboard(data.data.opportunities || []);
+
             } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('widget').innerHTML = `
-                    <div class="setup-required">
-                        <div class="setup-title">⚠️ Connection Error</div>
-                        <p>Unable to load sales data. Check your configuration:</p>
-                        <div class="setup-instructions">
-                            • Verify your GHL Private Integration token is correct<br>
-                            • Check your Location ID<br>
-                            • Ensure your Cloudflare Worker is deployed<br>
-                            • Make sure you have opportunities in GHL with status "won"
-                        </div>
-                    </div>
-                `;
+                console.error('Dashboard Error:', error);
+                showError(error.message);
             }
         }
-        
-        // Load data when page loads
-        if (isConfigured) {
-            loadSalesData();
-            // Refresh every 5 minutes
-            setInterval(loadSalesData, 5 * 60 * 1000);
+
+        function displayDashboard(opportunities) {
+            const loadingEl = document.getElementById('loading');
+            const dashboardEl = document.getElementById('dashboard');
+
+            // Hide loading, show dashboard
+            loadingEl.style.display = 'none';
+            dashboardEl.style.display = 'block';
+
+            // Calculate stats
+            const totalOpportunities = opportunities.length;
+            const totalValue = opportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+            const openOpportunities = opportunities.filter(opp => opp.status === 'open').length;
+            const avgValue = totalOpportunities > 0 ? totalValue / totalOpportunities : 0;
+
+            // Update stats
+            document.getElementById('totalOpportunities').textContent = totalOpportunities;
+            document.getElementById('totalValue').textContent = formatCurrency(totalValue);
+            document.getElementById('openOpportunities').textContent = openOpportunities;
+            document.getElementById('avgValue').textContent = formatCurrency(avgValue);
+
+            // Display opportunities
+            displayOpportunities(opportunities);
+
+            // Update timestamp
+            document.getElementById('lastUpdated').textContent = 
+                `Last updated: ${new Date().toLocaleString()}`;
         }
+
+        function displayOpportunities(opportunities) {
+            const container = document.getElementById('opportunitiesList');
+            
+            if (opportunities.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No opportunities found</p>';
+                return;
+            }
+
+            container.innerHTML = opportunities.slice(0, 10).map(opp => `
+                <div class="opportunity-card">
+                    <div class="opportunity-name">${opp.name || 'Unnamed Opportunity'}</div>
+                    <div class="opportunity-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Value:</span>
+                            <span class="detail-value">${formatCurrency(opp.monetaryValue || 0)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value status-${opp.status}">${opp.status || 'unknown'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Contact:</span>
+                            <span class="detail-value">${opp.contact?.name || 'No contact'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value">${opp.contact?.email || 'No email'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Created:</span>
+                            <span class="detail-value">${formatDate(opp.createdAt)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Updated:</span>
+                            <span class="detail-value">${formatDate(opp.updatedAt)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showError(message) {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'block';
+            errorEl.textContent = `Error loading dashboard: ${message}`;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
 </body>
 </html>
