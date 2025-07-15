@@ -51,27 +51,31 @@ function displayDashboard(opportunities) {
     loadingEl.style.display = 'none';
     dashboardEl.style.display = 'block';
 
-    // Filter to only "1. New Lead Pipeline" opportunities
-    const pipelineOpportunities = opportunities.filter(opp => 
-        opp.pipelineId && opp.pipelineId.includes('NewLead') || 
-        (opp.pipeline && opp.pipeline.includes('New Lead')) ||
-        // Fallback - if we can't identify pipeline, include all for now
-        true
-    );
+    // Debug: Log the first opportunity to see the data structure
+    console.log('First opportunity data:', opportunities[0]);
 
-    // Calculate stats for New Lead Pipeline only
+    // For now, show ALL opportunities (we'll add pipeline filtering once we see the data structure)
+    const pipelineOpportunities = opportunities;
+
+    // Calculate stats
     const totalOpportunities = pipelineOpportunities.length;
-    const wonOpportunities = pipelineOpportunities.filter(opp => opp.status === 'won').length;
-    const openOpportunities = pipelineOpportunities.filter(opp => opp.status === 'open').length;
-    const lostOpportunities = pipelineOpportunities.filter(opp => opp.status === 'lost').length;
+    const wonOpportunities = pipelineOpportunities.filter(opp => 
+        opp.status && opp.status.toLowerCase() === 'won'
+    ).length;
+    const openOpportunities = pipelineOpportunities.filter(opp => 
+        opp.status && opp.status.toLowerCase() === 'open'
+    ).length;
+    const lostOpportunities = pipelineOpportunities.filter(opp => 
+        opp.status && (opp.status.toLowerCase() === 'lost' || opp.status.toLowerCase() === 'abandon')
+    ).length;
     
     // Calculate values
     const pipelineValue = pipelineOpportunities
-        .filter(opp => opp.status === 'open')
+        .filter(opp => opp.status && opp.status.toLowerCase() === 'open')
         .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
     
     const wonRevenue = pipelineOpportunities
-        .filter(opp => opp.status === 'won')
+        .filter(opp => opp.status && opp.status.toLowerCase() === 'won')
         .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
         
     const winRate = totalOpportunities > 0 ? (wonOpportunities / totalOpportunities) * 100 : 0;
@@ -82,12 +86,12 @@ function displayDashboard(opportunities) {
     document.getElementById('openOpportunities').textContent = wonOpportunities;
     document.getElementById('avgValue').textContent = `${winRate.toFixed(1)}%`;
 
-    // Display opportunities (filter to New Lead Pipeline and show recent)
+    // Display opportunities (show all for now)
     displayOpportunities(pipelineOpportunities);
 
-    // Update timestamp
+    // Update timestamp with debug info
     document.getElementById('lastUpdated').textContent = 
-        `Last updated: ${new Date().toLocaleString()} | Showing: 1. New Lead Pipeline (${totalOpportunities} total, ${wonOpportunities} won, ${openOpportunities} open)`;
+        `Last updated: ${new Date().toLocaleString()} | Total: ${totalOpportunities}, Won: ${wonOpportunities}, Open: ${openOpportunities}`;
 }
 
 function displayOpportunities(opportunities) {
