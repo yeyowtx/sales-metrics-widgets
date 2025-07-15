@@ -1,47 +1,41 @@
-// FIXED Dashboard.js - This will show ALL your opportunities
-// Replace your current dashboard.js file with this code
+// dashboard.js - This file goes in your website, NOT in CloudFlare Worker
+// This runs in the browser and calls your CloudFlare Worker
 
-const API_BASE_URL = 'https://services.leadconnectorhq.com';
-const LOCATION_ID = 'zGb4qzUMN6KTFiW4WArQ'; // Your location ID
+const WORKER_URL = 'https://raspy-firefly-102f.laurencio.workers.dev';
+const LOCATION_ID = 'zGb4qzUMN6KTFiW4WArQ';
 const API_TOKEN = 'pit-30f24e77-d624-4226-92d7-2e1232a94a8e';
 
-// FIXED: Get ALL opportunities (no pipeline filtering)
+// Call your CloudFlare Worker to get opportunities
 async function getAllOpportunities() {
     try {
-        console.log('🔄 Fetching ALL opportunities...');
+        console.log('🔄 Fetching opportunities via CloudFlare Worker...');
         
-        const response = await fetch(`${API_BASE_URL}/opportunities/search`, {
-            method: 'POST',
+        const workerUrl = `${WORKER_URL}?endpoint=opportunities&location_id=${LOCATION_ID}`;
+        
+        const response = await fetch(workerUrl, {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${API_TOKEN}`,
-                'Content-Type': 'application/json',
-                'Version': '2021-07-28'
-            },
-            body: JSON.stringify({
-                locationId: LOCATION_ID,
-                // REMOVED: pipeline filter (this was causing missing opportunities)
-                status: ['open', 'won', 'lost', 'abandoned'], // FIXED: All statuses
-                limit: 250, // FIXED: Increased from 100
-                // REMOVED: Any date filtering
-                // REMOVED: Any assignee filtering
-            })
+                'Content-Type': 'application/json'
+            }
         });
 
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`Worker responded with ${response.status}: ${errorText}`);
         }
 
         const data = await response.json();
-        console.log('✅ API Response:', data);
+        console.log('✅ Worker Response:', data);
         
-        return data.opportunities || [];
+        return data.data.opportunities || [];
     } catch (error) {
-        console.error('❌ Error fetching opportunities:', error);
+        console.error('❌ Error calling CloudFlare Worker:', error);
         throw error;
     }
 }
 
-// Calculate metrics from ALL opportunities
+// Calculate metrics
 function calculateMetrics(opportunities) {
     const metrics = {
         total: opportunities.length,
@@ -49,14 +43,17 @@ function calculateMetrics(opportunities) {
         open: 0,
         won: 0,
         lost: 0,
-        avgValue: 0
+        avgValue: 0,
+        pipelines: new Set()
     };
 
     opportunities.forEach(opp => {
-        // Add to total value
         metrics.totalValue += (opp.monetaryValue || 0);
         
-        // Count by status
+        if (opp.pipelineId) {
+            metrics.pipelines.add(opp.pipelineId);
+        }
+        
         switch(opp.status?.toLowerCase()) {
             case 'open':
                 metrics.open++;
@@ -70,7 +67,6 @@ function calculateMetrics(opportunities) {
         }
     });
 
-    // Calculate average (only count opportunities with value > 0)
     const opportunitiesWithValue = opportunities.filter(opp => (opp.monetaryValue || 0) > 0);
     if (opportunitiesWithValue.length > 0) {
         metrics.avgValue = metrics.totalValue / opportunitiesWithValue.length;
@@ -98,21 +94,17 @@ function formatDate(dateString) {
     });
 }
 
-// Get status badge class
+// Get status class
 function getStatusClass(status) {
     switch(status?.toLowerCase()) {
-        case 'open':
-            return 'status-open';
-        case 'won':
-            return 'status-closed';
-        case 'lost':
-            return 'status-lost';
-        default:
-            return 'detail-value';
+        case 'open': return 'status-open';
+        case 'won': return 'status-closed';
+        case 'lost': return 'status-lost';
+        default: return 'detail-value';
     }
 }
 
-// Render opportunities list
+// Render opportunities
 function renderOpportunities(opportunities) {
     const container = document.getElementById('opportunitiesList');
     
@@ -121,13 +113,11 @@ function renderOpportunities(opportunities) {
         return;
     }
 
-    // Sort by creation date (newest first)
     const sortedOpportunities = opportunities.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
     );
 
-    // Show first 20 for performance
-    const displayOpportunities = sortedOpportunities.slice(0, 20);
+    const displayOpportunities = sortedOpportunities.slice(0, 25);
 
     container.innerHTML = displayOpportunities.map(opp => `
         <div class="opportunity-card">
@@ -147,87 +137,83 @@ function renderOpportunities(opportunities) {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Contact:</span>
-                    <span class="detail-value">${opp.contact?.name || 'No contact'}</span>
+                    <span class="detail-value">${opp.contact?.name || opp.name || 'No contact'}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Pipeline:</span>
-                    <span class="detail-value">${opp.pipelineId?.slice(-8) || 'Unknown'}</span>
+                    <span class="detail-value">${opp.pipelineId?.slice(-6) || 'Unknown'}</span>
                 </div>
             </div>
         </div>
     `).join('');
 
-    // Add summary if showing partial results
-    if (opportunities.length > 20) {
+    if (opportunities.length > 25) {
         container.innerHTML += `
-            <div style="text-align: center; padding: 20px; color: #666;">
-                Showing 20 of ${opportunities.length} total opportunities
+            <div style="text-align: center; padding: 20px; color: #666; background: #f8fafc; border-radius: 8px; margin-top: 20px;">
+                📋 Showing 25 of <strong>${opportunities.length}</strong> total opportunities<br>
+                💰 All ${opportunities.length} opportunities included in metrics above
             </div>
         `;
     }
 }
 
-// Update dashboard with metrics
+// Update dashboard
 function updateDashboard(opportunities) {
     const metrics = calculateMetrics(opportunities);
 
-    // Update stat cards
     document.getElementById('totalOpportunities').textContent = metrics.total;
     document.getElementById('totalValue').textContent = formatCurrency(metrics.totalValue);
     document.getElementById('openOpportunities').textContent = metrics.open;
     document.getElementById('avgValue').textContent = formatCurrency(metrics.avgValue);
 
-    // Render opportunities list
     renderOpportunities(opportunities);
 
-    // Update last updated time
     document.getElementById('lastUpdated').textContent = 
-        `Last updated: ${new Date().toLocaleString()}`;
+        `Last updated: ${new Date().toLocaleString()} | ${metrics.pipelines.size} Pipelines | ${opportunities.length} Total`;
 
     console.log('📊 Dashboard Updated:', metrics);
 }
 
-// Show error message
+// Show error
 function showError(message) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('error').style.display = 'block';
-    document.getElementById('error').textContent = message;
+    document.getElementById('error').innerHTML = `
+        <strong>Error:</strong> ${message}<br><br>
+        <small>Worker: ${WORKER_URL}<br>Location: ${LOCATION_ID}</small>
+    `;
 }
 
-// Main dashboard loading function
+// Main load function
 async function loadDashboard() {
     try {
-        // Show loading
         document.getElementById('loading').style.display = 'block';
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('error').style.display = 'none';
 
-        // Check if API token is set
-        if (API_TOKEN === 'YOUR_API_TOKEN_HERE') {
-            throw new Error('Please update API_TOKEN in dashboard.js with your actual GHL API token');
-        }
+        console.log('🚀 Loading dashboard via CloudFlare Worker...');
 
-        // Fetch all opportunities
         const opportunities = await getAllOpportunities();
         
-        // Update dashboard
+        console.log(`✅ Received ${opportunities.length} opportunities`);
+
         updateDashboard(opportunities);
 
-        // Show dashboard
         document.getElementById('loading').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
-        console.log(`✅ Successfully loaded ${opportunities.length} opportunities`);
-
     } catch (error) {
         console.error('❌ Dashboard load failed:', error);
-        showError(`Failed to load dashboard: ${error.message}`);
+        showError(error.message);
     }
 }
 
-// Load dashboard when page loads
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', loadDashboard);
 
 // Auto-refresh every 5 minutes
 setInterval(loadDashboard, 5 * 60 * 1000);
+
+// Global function for refresh button
+window.loadDashboard = loadDashboard;
