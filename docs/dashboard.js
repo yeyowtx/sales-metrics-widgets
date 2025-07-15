@@ -51,102 +51,65 @@ function displayDashboard(opportunities) {
     loadingEl.style.display = 'none';
     dashboardEl.style.display = 'block';
 
-    // Debug: Log the first opportunity to see the data structure
-    console.log('First opportunity data:', opportunities[0]);
-
-    // For now, show ALL opportunities (we'll add pipeline filtering once we see the data structure)
-    const pipelineOpportunities = opportunities;
-
     // Calculate stats
-    const totalOpportunities = pipelineOpportunities.length;
-    const wonOpportunities = pipelineOpportunities.filter(opp => 
-        opp.status && opp.status.toLowerCase() === 'won'
-    ).length;
-    const openOpportunities = pipelineOpportunities.filter(opp => 
-        opp.status && opp.status.toLowerCase() === 'open'
-    ).length;
-    const lostOpportunities = pipelineOpportunities.filter(opp => 
-        opp.status && (opp.status.toLowerCase() === 'lost' || opp.status.toLowerCase() === 'abandon')
-    ).length;
-    
-    // Calculate values
-    const pipelineValue = pipelineOpportunities
-        .filter(opp => opp.status && opp.status.toLowerCase() === 'open')
-        .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-    
-    const wonRevenue = pipelineOpportunities
-        .filter(opp => opp.status && opp.status.toLowerCase() === 'won')
-        .reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-        
-    const winRate = totalOpportunities > 0 ? (wonOpportunities / totalOpportunities) * 100 : 0;
+    const totalOpportunities = opportunities.length;
+    const totalValue = opportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+    const openOpportunities = opportunities.filter(opp => opp.status === 'open').length;
+    const avgValue = totalOpportunities > 0 ? totalValue / totalOpportunities : 0;
 
     // Update stats
     document.getElementById('totalOpportunities').textContent = totalOpportunities;
-    document.getElementById('totalValue').textContent = formatCurrency(pipelineValue);
-    document.getElementById('openOpportunities').textContent = wonOpportunities;
-    document.getElementById('avgValue').textContent = `${winRate.toFixed(1)}%`;
+    document.getElementById('totalValue').textContent = formatCurrency(totalValue);
+    document.getElementById('openOpportunities').textContent = openOpportunities;
+    document.getElementById('avgValue').textContent = formatCurrency(avgValue);
 
-    // Display opportunities (show all for now)
-    displayOpportunities(pipelineOpportunities);
+    // Display opportunities
+    displayOpportunities(opportunities);
 
-    // Update timestamp with debug info
+    // Update timestamp
     document.getElementById('lastUpdated').textContent = 
-        `Last updated: ${new Date().toLocaleString()} | Total: ${totalOpportunities}, Won: ${wonOpportunities}, Open: ${openOpportunities}`;
+        `Last updated: ${new Date().toLocaleString()}`;
 }
 
 function displayOpportunities(opportunities) {
     const container = document.getElementById('opportunitiesList');
-    
-    console.log('Displaying opportunities:', opportunities.length, 'opportunities');
-    console.log('First opportunity structure:', opportunities[0]);
     
     if (opportunities.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #666;">No opportunities found</p>';
         return;
     }
 
-    container.innerHTML = opportunities.slice(0, 10).map(opp => {
-        // Handle different possible data structures
-        const name = opp.name || 'Unnamed Opportunity';
-        const value = opp.monetaryValue || 0;
-        const status = opp.status || 'unknown';
-        const contactName = opp.contact?.name || opp.contactName || 'No contact';
-        const email = opp.contact?.email || opp.email || 'No email';
-        const created = opp.createdAt || opp.created || '';
-        const updated = opp.updatedAt || opp.updated || '';
-        
-        return `
-            <div class="opportunity-card">
-                <div class="opportunity-name">${name}</div>
-                <div class="opportunity-details">
-                    <div class="detail-item">
-                        <span class="detail-label">Value:</span>
-                        <span class="detail-value">${formatCurrency(value)}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Status:</span>
-                        <span class="detail-value status-${status.toLowerCase()}">${status}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Contact:</span>
-                        <span class="detail-value">${contactName}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Email:</span>
-                        <span class="detail-value">${email}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Created:</span>
-                        <span class="detail-value">${formatDate(created)}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Updated:</span>
-                        <span class="detail-value">${formatDate(updated)}</span>
-                    </div>
+    container.innerHTML = opportunities.slice(0, 10).map(opp => `
+        <div class="opportunity-card">
+            <div class="opportunity-name">${opp.name || 'Unnamed Opportunity'}</div>
+            <div class="opportunity-details">
+                <div class="detail-item">
+                    <span class="detail-label">Value:</span>
+                    <span class="detail-value">${formatCurrency(opp.monetaryValue || 0)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value status-${opp.status}">${opp.status || 'unknown'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Contact:</span>
+                    <span class="detail-value">${opp.contact?.name || 'No contact'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">${opp.contact?.email || 'No email'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Created:</span>
+                    <span class="detail-value">${formatDate(opp.createdAt)}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Updated:</span>
+                    <span class="detail-value">${formatDate(opp.updatedAt)}</span>
                 </div>
             </div>
-        `;
-    }).join('');
+        </div>
+    `).join('');
 }
 
 function showError(message) {
