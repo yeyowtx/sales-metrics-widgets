@@ -1,113 +1,21 @@
+<!-- 1. ytd-sales-total.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 YTD Sales Performance</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>YTD Sales Total</title>
+    <link rel="stylesheet" href="widget-styles.css">
 </head>
 <body>
-    <header>
-        <h1>🚀 YTD Sales Performance</h1>
-        <p>Real-time pipeline insights powered by GHL API</p>
-    </header>
-
-    <main>
-        <!-- Loading Screen (will be hidden by JavaScript) -->
-        <div id="loading-screen">
-            <h2 id="loading-text">Loading your sales data...</h2>
-        </div>
-
-        <!-- Dashboard Content (will be shown by JavaScript) -->
-        <div id="dashboard-content" style="display: none;">
-            
-            <!-- Total Opportunities Card -->
-            <div id="total-card" class="metric-card">
-                <h2 id="total-opportunities">0</h2>
-                <p>Total Opportunities</p>
-                <small id="last-updated">Real-time data via GHL API</small>
-            </div>
-
-            <!-- Status Breakdown -->
-            <section id="status-section">
-                <h3>📊 Status Breakdown</h3>
-                <div id="status-grid" class="status-grid">
-                    <div id="open-card" class="status-card open">
-                        <div class="status-number" id="open-count">0</div>
-                        <div class="status-label">Open</div>
-                        <div class="status-percentage" id="open-percentage">0%</div>
-                    </div>
-                    <div id="won-card" class="status-card won">
-                        <div class="status-number" id="won-count">0</div>
-                        <div class="status-label">Won</div>
-                        <div class="status-percentage" id="won-percentage">0%</div>
-                    </div>
-                    <div id="lost-card" class="status-card lost">
-                        <div class="status-number" id="lost-count">0</div>
-                        <div class="status-label">Lost</div>
-                        <div class="status-percentage" id="lost-percentage">0%</div>
-                    </div>
-                    <div id="abandoned-card" class="status-card abandoned">
-                        <div class="status-number" id="abandoned-count">0</div>
-                        <div class="status-label">Abandoned</div>
-                        <div class="status-percentage" id="abandoned-percentage">0%</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Pipeline Breakdown -->
-            <section id="pipeline-section">
-                <h3>📈 Pipeline Breakdown</h3>
-                <div id="pipeline-list" class="pipeline-list">
-                    <!-- Pipeline items will be populated by JavaScript -->
-                </div>
-            </section>
-
-            <!-- Recent Opportunities Table -->
-            <section id="opportunities-section">
-                <h3>📋 Recent Opportunities</h3>
-                <div id="opportunities-table" class="table-container">
-                    <!-- Table will be populated by JavaScript -->
-                </div>
-            </section>
-
-            <!-- API Status -->
-            <section id="api-status-section">
-                <h3>🔗 API Status</h3>
-                <div id="api-status" class="api-status">
-                    <div class="status-item">
-                        <span class="status-indicator" id="worker-status">🟡</span>
-                        <span>CloudFlare Worker</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-indicator" id="api-status">🟡</span>
-                        <span>GHL API Connection</span>
-                    </div>
-                    <div class="status-item">
-                        <span class="status-indicator" id="pagination-status">🟡</span>
-                        <span>Pagination Status</span>
-                    </div>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- Error Display -->
-        <div id="error-container" style="display: none;" class="error-container">
-            <h3>❌ Error</h3>
-            <p id="error-message">Something went wrong...</p>
-            <button id="retry-button" onclick="location.reload()">Retry</button>
-        </div>
-
-        <!-- Refresh Button -->
-        <button id="refresh-button" class="refresh-btn">🔄 Refresh Data</button>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 YTD Sales Performance Dashboard</p>
-    </footer>
-
-    <!-- Load JavaScript -->
-    <script src="dashboard.js"></script>
+    <div class="widget" data-metric="ytd_sales_total">
+        <div class="label">YTD Sales Total</div>
+        <div class="value">...</div>
+        <div class="additional"></div>
+        <div class="designer-name"></div>
+        <div class="last-updated"></div>
+        <div class="error"></div>
+    </div>
+    <script src="widget.js?metric=ytd_sales_total&range=ytd"></script>
 </body>
 </html>
