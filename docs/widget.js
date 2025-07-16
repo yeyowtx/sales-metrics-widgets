@@ -1,4 +1,4 @@
-// widget.js - Unified Sales Metrics Widget Engine
+// widget.js - Complete Sales Metrics Widget Engine
 // Handles all metric calculations with designer filtering and manual goal input
 
 (async () => {
