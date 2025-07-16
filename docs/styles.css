@@ -8,7 +8,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
     min-height: 100vh;
     color: #333;
     line-height: 1.6;
@@ -78,7 +78,7 @@ main {
 #total-opportunities {
     font-size: 4rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
@@ -139,19 +139,19 @@ section h3 {
 }
 
 .status-card.open {
-    --status-color: #4CAF50;
+    --status-color: #6b8e6b;
 }
 
 .status-card.won {
-    --status-color: #2196F3;
+    --status-color: #5a7aa5;
 }
 
 .status-card.lost {
-    --status-color: #FF5722;
+    --status-color: #cc6666;
 }
 
 .status-card.abandoned {
-    --status-color: #9E9E9E;
+    --status-color: #888888;
 }
 
 .status-number {
@@ -211,8 +211,8 @@ section h3 {
 
 .pipeline-count {
     font-weight: 600;
-    color: #667eea;
-    background: #f0f2ff;
+    color: #aa3333;
+    background: #f5f0f0;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -265,23 +265,23 @@ section h3 {
 }
 
 .status-badge.open {
-    background: #e8f5e8;
-    color: #2e7d32;
+    background: #e8f0e8;
+    color: #4a6b4a;
 }
 
 .status-badge.won {
-    background: #e3f2fd;
-    color: #1565c0;
+    background: #e8f0f5;
+    color: #3e5a78;
 }
 
 .status-badge.lost {
-    background: #ffebee;
-    color: #c62828;
+    background: #f5e8e8;
+    color: #8b4545;
 }
 
 .status-badge.abandoned {
-    background: #f5f5f5;
-    color: #616161;
+    background: #f0f0f0;
+    color: #666666;
 }
 
 .table-info {
@@ -323,15 +323,15 @@ section h3 {
 /* Error Container */
 .error-container {
     background: white;
-    border: 2px solid #ff5722;
+    border: 2px solid #cc6666;
     border-radius: 15px;
     padding: 2rem;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(255, 87, 34, 0.1);
+    box-shadow: 0 8px 25px rgba(204, 102, 102, 0.1);
 }
 
 .error-container h3 {
-    color: #d32f2f;
+    color: #aa3333;
     margin-bottom: 1rem;
 }
 
@@ -345,21 +345,21 @@ section h3 {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #aa3333 0%, #882222 100%);
     color: white;
     border: none;
     padding: 1rem 1.5rem;
     border-radius: 50px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(170, 51, 51, 0.3);
     transition: all 0.3s ease;
     font-size: 1rem;
 }
 
 .refresh-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 12px 35px rgba(170, 51, 51, 0.4);
 }
 
 .refresh-btn:active {
