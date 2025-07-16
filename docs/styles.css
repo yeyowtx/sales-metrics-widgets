@@ -1,4 +1,4 @@
-/* styles.css - Beautiful Dashboard Styling */
+/* styles.css - Complete Dashboard & Widget Styling */
 
 * {
     margin: 0;
@@ -59,6 +59,149 @@ main {
     display: grid;
     gap: 2rem;
 }
+
+/* ======================
+   INDIVIDUAL WIDGET STYLES
+   ====================== */
+
+/* Widget container for individual metric widgets */
+.widget {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    min-width: 300px;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+    margin: 2rem auto;
+}
+
+.widget::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
+}
+
+.widget .label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.widget .value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    line-height: 1;
+    min-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.widget .value.loading {
+    color: #ccc;
+    background: none;
+    -webkit-text-fill-color: #ccc;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.widget .value.error {
+    color: #cc6666;
+    background: none;
+    -webkit-text-fill-color: #cc6666;
+    font-size: 2rem;
+}
+
+.widget .additional {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.widget .designer-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.widget .last-updated {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 1rem;
+}
+
+.widget .error {
+    color: #cc6666;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: #fdf2f2;
+    border-radius: 8px;
+    display: none;
+}
+
+/* Metric-specific styling */
+.widget[data-metric="goal_progress"] .value {
+    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.widget[data-metric="dig_performance"] .value {
+    background: linear-gradient(135deg, #6b8e6b 0%, #5a7a5a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.widget[data-metric="unit_sales"] .value {
+    background: linear-gradient(135deg, #8b5a8b 0%, #7a4a7a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Team performance styling */
+.widget[data-team="true"] {
+    border: 2px solid #5a7aa5;
+}
+
+.widget[data-team="true"]::before {
+    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
+}
+
+.widget[data-team="true"] .designer-name {
+    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
+    color: white;
+}
+
+/* Widget hover effects */
+.widget:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+/* ======================
+   DASHBOARD METRIC CARDS
+   ====================== */
 
 /* Metric Cards */
 .metric-card {
@@ -374,7 +517,41 @@ footer {
     opacity: 0.7;
 }
 
-/* Responsive Design */
+/* ======================
+   ANIMATIONS
+   ====================== */
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#dashboard-content > * {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+#dashboard-content > *:nth-child(1) { animation-delay: 0.1s; }
+#dashboard-content > *:nth-child(2) { animation-delay: 0.2s; }
+#dashboard-content > *:nth-child(3) { animation-delay: 0.3s; }
+#dashboard-content > *:nth-child(4) { animation-delay: 0.4s; }
+#dashboard-content > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* ======================
+   RESPONSIVE DESIGN
+   ====================== */
+
 @media (max-width: 768px) {
     header h1 {
         font-size: 2rem;
@@ -424,26 +601,20 @@ footer {
         padding: 0.8rem 1.2rem;
         font-size: 0.9rem;
     }
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
+    
+    /* Widget responsive */
+    .widget {
+        padding: 2rem;
+        min-width: 250px;
+        margin: 1rem;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    
+    .widget .value {
+        font-size: 2.5rem;
+        min-height: 2.5rem;
+    }
+    
+    .widget .label {
+        font-size: 1rem;
     }
 }
-
-#dashboard-content > * {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-#dashboard-content > *:nth-child(1) { animation-delay: 0.1s; }
-#dashboard-content > *:nth-child(2) { animation-delay: 0.2s; }
-#dashboard-content > *:nth-child(3) { animation-delay: 0.3s; }
-#dashboard-content > *:nth-child(4) { animation-delay: 0.4s; }
-#dashboard-content > *:nth-child(5) { animation-delay: 0.5s; }
