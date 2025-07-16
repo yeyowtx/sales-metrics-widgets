@@ -9,7 +9,22 @@
     
     // Get URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const metric = urlParams.get('metric');
+    const pageUrl = new URL(window.location.href);
+    const pathParts = pageUrl.pathname.split('/');
+    const fileName = pathParts[pathParts.length - 1];
+    
+    // Extract metric from filename
+    let metric = urlParams.get('metric');
+    if (!metric && fileName) {
+        if (fileName.includes('ytd-sales-total')) metric = 'ytd_sales_total';
+        else if (fileName.includes('monthly-sales')) metric = 'monthly_sales';
+        else if (fileName.includes('goal-progress')) metric = 'goal_progress';
+        else if (fileName.includes('dig-performance')) metric = 'dig_performance';
+        else if (fileName.includes('unit-sales')) metric = 'unit_sales';
+        else if (fileName.includes('average-project-sale')) metric = 'average_project_sale';
+        else if (fileName.includes('lead-generation')) metric = 'lead_generation';
+    }
+    
     const designerId = urlParams.get('designer');
     const isTeam = urlParams.get('team') === 'true';
     const yearlyGoal = parseFloat(urlParams.get('yearlyGoal')) || 800000;
