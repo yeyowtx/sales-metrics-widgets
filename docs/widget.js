@@ -1,4 +1,4 @@
-let opportunities = data.opportunities// widget.js - Complete Sales Metrics Widget Engine
+// widget.js - Complete Sales Metrics Widget Engine
 // Handles all metric calculations with designer filtering and manual goal input
 
 (async () => {
@@ -24,6 +24,8 @@ let opportunities = data.opportunities// widget.js - Complete Sales Metrics Widg
         else if (fileName.includes('average-project-sale')) metric = 'average_project_sale';
         else if (fileName.includes('lead-generation')) metric = 'lead_generation';
     }
+    
+    console.log(`🎯 Detected metric: ${metric} from filename: ${fileName}`);
     
     const designerId = urlParams.get('designer');
     const isTeam = urlParams.get('team') === 'true';
@@ -69,7 +71,7 @@ let opportunities = data.opportunities// widget.js - Complete Sales Metrics Widg
         console.log(`📅 Date filtered to ${opportunities.length} opportunities`);
         
         // Calculate metric based on type
-        const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal);
+        const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data);
         
         // Display result
         displayResult(result, metric, designerId, isTeam);
@@ -108,7 +110,7 @@ function filterByDateRange(opportunities, range) {
 }
 
 // Calculate specific metric
-function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal) {
+function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data) {
     const wonOpportunities = opportunities.filter(opp => opp.status === 'won');
     const completedJobs = wonOpportunities.filter(opp => 
         opp.contact?.tags?.includes('job completed')
@@ -131,6 +133,7 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal) {
             
         case 'goal_progress':
             const totalSales = wonOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+            const urlParams = new URLSearchParams(window.location.search);
             const goal = urlParams.get('range') === 'ytd' ? yearlyGoal : monthlyGoal;
             return {
                 value: (totalSales / goal) * 100,
@@ -168,6 +171,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal) {
             
         case 'lead_generation':
             // For lead generation, use ALL opportunities (not just won ones)
+            const urlParams2 = new URLSearchParams(window.location.search);
+            const designerId = urlParams2.get('designer');
+            const isTeam = urlParams2.get('team') === 'true';
             const allOpps = data.opportunities || [];
             const filteredLeads = designerId && !isTeam 
                 ? allOpps.filter(opp => opp.assignedTo === designerId)
