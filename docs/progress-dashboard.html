@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Progress Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Progress Dashboard Specific Styles */
+        .progress-dashboard {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            width: 100%;
+            margin: 0;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .progress-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        
+        .designer-name {
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .progress-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-section {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .progress-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-container {
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.8s ease-in-out;
+            position: relative;
+        }
+        
+        .progress-fill.ytd {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+        
+        .progress-fill.monthly {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #111827;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-percentage {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .summary-value.deals { color: #7c3aed; }
+        .summary-value.avg { color: #0891b2; }
+        .summary-value.dig { color: #059669; }
+        .summary-value.leads { color: #65a30d; }
+        
+        .summary-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .progress-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .progress-dashboard {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-dashboard">
+        <div class="progress-header">
+            <h2>Sales Performance Dashboard</h2>
+            <div class="designer-name" id="designer-name">Loading...</div>
+        </div>
+        
+        <div class="progress-grid">
+            <!-- YTD Progress -->
+            <div class="progress-section">
+                <div class="progress-title">Year-to-Date Progress</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill ytd" id="ytd-progress" style="width: 0%">
+                            <span class="progress-percentage" id="ytd-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="ytd-actual">$0</div>
+                        <div class="stat-label">Actual</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="ytd-goal">$0</div>
+                        <div class="stat-label">Goal</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="ytd-remaining">$0</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monthly Progress -->
+            <div class="progress-section">
+                <div class="progress-title">Current Month Progress</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill monthly" id="monthly-progress" style="width: 0%">
+                            <span class="progress-percentage" id="monthly-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthly-actual">$0</div>
+                        <div class="stat-label">Actual</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthly-goal">$0</div>
+                        <div class="stat-label">Goal</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="monthly-remaining">$0</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="summary-stats">
+            <div class="summary-item">
+                <div class="summary-value deals" id="deals-won">0</div>
+                <div class="summary-label">Deals Won</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value avg" id="avg-sale">$0</div>
+                <div class="summary-label">Avg Sale</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value dig" id="dig-rate">0%</div>
+                <div class="summary-label">Dig Rate</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value leads" id="total-leads">0</div>
+                <div class="summary-label">Total Leads</div>
+            </div>
+        </div>
+        
+        <div class="last-updated" id="last-updated">Loading...</div>
+    </div>
+    
+    <script src="progress-widget.js"></script>
+</body>
+</html>
