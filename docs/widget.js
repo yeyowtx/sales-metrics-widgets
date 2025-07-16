@@ -1,4 +1,4 @@
-// widget.js - Complete Sales Metrics Widget Engine
+let opportunities = data.opportunities// widget.js - Complete Sales Metrics Widget Engine
 // Handles all metric calculations with designer filtering and manual goal input
 
 (async () => {
@@ -16,7 +16,7 @@
     // Extract metric from filename
     let metric = urlParams.get('metric');
     if (!metric && fileName) {
-        if (fileName.includes('ytd-sales-total')) metric = 'ytd_sales_total';
+        if (fileName.includes('ytd-sales')) metric = 'ytd_sales_total';
         else if (fileName.includes('monthly-sales')) metric = 'monthly_sales';
         else if (fileName.includes('goal-progress')) metric = 'goal_progress';
         else if (fileName.includes('dig-performance')) metric = 'dig_performance';
@@ -167,8 +167,13 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal) {
             };
             
         case 'lead_generation':
+            // For lead generation, use ALL opportunities (not just won ones)
+            const allOpps = data.opportunities || [];
+            const filteredLeads = designerId && !isTeam 
+                ? allOpps.filter(opp => opp.assignedTo === designerId)
+                : allOpps;
             return {
-                value: opportunities.length,
+                value: filteredLeads.length,
                 format: 'number',
                 label: 'Lead Generation'
             };
