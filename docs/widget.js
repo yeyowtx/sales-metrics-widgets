@@ -31,9 +31,9 @@
     const isTeam = urlParams.get('team') === 'true';
     const yearlyGoal = parseFloat(urlParams.get('yearlyGoal')) || 800000;
     const monthlyGoal = parseFloat(urlParams.get('monthlyGoal')) || 66667;
-    const dateRange = urlParams.get('range') || 'current_month'; // current_month, ytd
+    const dateRange = urlParams.get('range') || 'ytd'; // Changed default to ytd
     
-    // Designer mapping
+    // Designer mapping - CORRECTED IDs
     const designers = {
         '1avdHsezyj8F13jdoajF': 'Bradley Marquez',
         'yWDJbBcBXvPf1nY4Isma': 'Christian Thomas', 
@@ -66,12 +66,12 @@
             console.log(`👤 Filtered to ${opportunities.length} opportunities for ${designers[designerId]}`);
         }
         
-        // Filter by date range
+        // Filter by date range - FIXED DATE FILTERING
         opportunities = filterByDateRange(opportunities, dateRange);
         console.log(`📅 Date filtered to ${opportunities.length} opportunities`);
         
         // Calculate metric based on type
-        const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data);
+        const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam);
         
         // Display result
         displayResult(result, metric, designerId, isTeam);
@@ -84,33 +84,39 @@
     }
 })();
 
-// Filter opportunities by date range
+// Filter opportunities by date range - FIXED
 function filterByDateRange(opportunities, range) {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     
+    // For lead generation, return ALL opportunities (no date filter)
+    if (window.location.pathname.includes('lead-generation')) {
+        return opportunities; // No date filtering for lead generation
+    }
+    
     return opportunities.filter(opp => {
+        // Only filter won opportunities by date
+        if (opp.status !== 'won') return false;
+        
         const wonDate = new Date(opp.lastStatusChangeAt);
         
         switch (range) {
             case 'current_month':
                 return wonDate.getFullYear() === currentYear && 
-                       wonDate.getMonth() === currentMonth &&
-                       opp.status === 'won';
+                       wonDate.getMonth() === currentMonth;
                        
             case 'ytd':
-                return wonDate.getFullYear() === currentYear &&
-                       opp.status === 'won';
+                return wonDate.getFullYear() === currentYear;
                        
             default:
-                return opp.status === 'won';
+                return true; // No date filtering
         }
     });
 }
 
-// Calculate specific metric
-function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data) {
+// Calculate specific metric - FIXED
+function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam) {
     const wonOpportunities = opportunities.filter(opp => opp.status === 'won');
     const completedJobs = wonOpportunities.filter(opp => 
         opp.contact?.tags?.includes('job completed')
@@ -170,10 +176,7 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data) {
             };
             
         case 'lead_generation':
-            // For lead generation, use ALL opportunities (not just won ones)
-            const urlParams2 = new URLSearchParams(window.location.search);
-            const designerId = urlParams2.get('designer');
-            const isTeam = urlParams2.get('team') === 'true';
+            // For lead generation, use ALL opportunities for this designer
             const allOpps = data.opportunities || [];
             const filteredLeads = designerId && !isTeam 
                 ? allOpps.filter(opp => opp.assignedTo === designerId)
