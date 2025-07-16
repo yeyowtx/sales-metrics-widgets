@@ -8,10 +8,12 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+    background: #ffffff;
     min-height: 100vh;
     color: #333;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
 }
 
 /* Header */
@@ -66,16 +68,18 @@ main {
 
 /* Widget container for individual metric widgets */
 .widget {
-    background: white;
-    border-radius: 20px;
-    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    min-width: 300px;
-    max-width: 400px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    width: 100%;
+    min-width: 320px;
+    max-width: none;
     position: relative;
     overflow: hidden;
-    margin: 2rem auto;
+    margin: 0;
+    border: 1px solid #e5e7eb;
 }
 
 .widget::before {
@@ -84,28 +88,26 @@ main {
     top: 0;
     left: 0;
     right: 0;
-    height: 5px;
-    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
+    height: 3px;
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 .widget .label {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #666;
+    color: #6b7280;
     margin-bottom: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .widget .value {
-    font-size: 3.5rem;
+    font-size: 2.5rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 1rem;
+    color: #059669;
+    margin-bottom: 0.8rem;
     line-height: 1;
-    min-height: 3.5rem;
+    min-height: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,20 +135,20 @@ main {
 }
 
 .widget .designer-name {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    color: #333;
+    color: #374151;
     margin-bottom: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #f8f9fa;
-    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+    background: #f9fafb;
+    border-radius: 12px;
     display: inline-block;
 }
 
 .widget .last-updated {
-    font-size: 0.8rem;
-    color: #999;
-    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.8rem;
 }
 
 .widget .error {
@@ -161,42 +163,52 @@ main {
 
 /* Metric-specific styling */
 .widget[data-metric="goal_progress"] .value {
-    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #2563eb;
 }
 
 .widget[data-metric="dig_performance"] .value {
-    background: linear-gradient(135deg, #6b8e6b 0%, #5a7a5a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #059669;
 }
 
 .widget[data-metric="unit_sales"] .value {
-    background: linear-gradient(135deg, #8b5a8b 0%, #7a4a7a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #7c3aed;
+}
+
+.widget[data-metric="ytd_sales_total"] .value {
+    color: #dc2626;
+}
+
+.widget[data-metric="monthly_sales"] .value {
+    color: #ea580c;
+}
+
+.widget[data-metric="average_project_sale"] .value {
+    color: #0891b2;
+}
+
+.widget[data-metric="lead_generation"] .value {
+    color: #65a30d;
 }
 
 /* Team performance styling */
 .widget[data-team="true"] {
-    border: 2px solid #5a7aa5;
+    border: 2px solid #2563eb;
 }
 
 .widget[data-team="true"]::before {
-    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
 .widget[data-team="true"] .designer-name {
-    background: linear-gradient(135deg, #5a7aa5 0%, #4a6a95 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: white;
 }
 
 /* Widget hover effects */
 .widget:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    transition: all 0.2s ease;
 }
 
 /* ======================
@@ -604,17 +616,17 @@ footer {
     
     /* Widget responsive */
     .widget {
-        padding: 2rem;
-        min-width: 250px;
-        margin: 1rem;
+        padding: 1.5rem;
+        min-width: 280px;
+        margin: 0;
     }
     
     .widget .value {
-        font-size: 2.5rem;
-        min-height: 2.5rem;
+        font-size: 2rem;
+        min-height: 2rem;
     }
     
     .widget .label {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
 }
