@@ -164,11 +164,11 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             };
             
         case 'lead_generation':
-            // MONTHLY: Current month leads only
+            // MONTHLY: All opportunities assigned to designer this month (regardless of status)
             const monthlyLeads = opportunities.filter(opp => {
-                const createdDate = new Date(opp.createdAt);
-                return createdDate.getFullYear() === currentYear && 
-                       createdDate.getMonth() === currentMonth;
+                const assignedDate = new Date(opp.updatedAt);
+                return assignedDate.getFullYear() === currentYear && 
+                       assignedDate.getMonth() === currentMonth;
             });
             return {
                 value: monthlyLeads.length,
