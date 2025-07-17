@@ -114,23 +114,6 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
                 label: 'Monthly Sales'
             };
             
-        case 'goal_progress':
-            // Use YTD for goal progress calculation
-            const goalOpportunities = opportunities.filter(opp => {
-                if (opp.status !== 'won') return false;
-                const wonDate = new Date(opp.lastStatusChangeAt);
-                return wonDate.getFullYear() === currentYear;
-            });
-            const totalSales = goalOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-            const urlParams = new URLSearchParams(window.location.search);
-            const goal = urlParams.get('range') === 'ytd' ? yearlyGoal : monthlyGoal;
-            return {
-                value: (totalSales / goal) * 100,
-                format: 'percentage',
-                label: 'Goal Progress',
-                additional: `$${totalSales.toLocaleString()} / $${goal.toLocaleString()}`
-            };
-            
         case 'dig_performance':
             // Use YTD for dig performance
             const digOpportunities = opportunities.filter(opp => {
@@ -152,11 +135,12 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             };
             
         case 'unit_sales':
-            // Use YTD for unit sales
+            // Use CURRENT MONTH for unit sales
             const unitOpportunities = opportunities.filter(opp => {
                 if (opp.status !== 'won') return false;
                 const wonDate = new Date(opp.lastStatusChangeAt);
-                return wonDate.getFullYear() === currentYear;
+                return wonDate.getFullYear() === currentYear && 
+                       wonDate.getMonth() === currentMonth;
             });
             return {
                 value: unitOpportunities.length,
