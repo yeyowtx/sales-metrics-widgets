@@ -66,11 +66,7 @@
             console.log(`👤 Filtered to ${opportunities.length} opportunities for ${designers[designerId]}`);
         }
         
-        // Filter by date range - FIXED DATE FILTERING
-        opportunities = filterByDateRange(opportunities, dateRange);
-        console.log(`📅 Date filtered to ${opportunities.length} opportunities`);
-        
-        // Calculate metric based on type
+        // Calculate metric based on type (NO date filtering here - handled per metric)
         const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam);
         
         // Display result
@@ -84,61 +80,48 @@
     }
 })();
 
-// Filter opportunities by date range - FIXED
-function filterByDateRange(opportunities, range) {
+// Calculate specific metric - FIXED with proper date filtering per metric
+function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam) {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     
-    // For lead generation, return ALL opportunities (no date filter)
-    if (window.location.pathname.includes('lead-generation')) {
-        return opportunities; // No date filtering for lead generation
-    }
-    
-    return opportunities.filter(opp => {
-        // Only filter won opportunities by date
-        if (opp.status !== 'won') return false;
-        
-        const wonDate = new Date(opp.lastStatusChangeAt);
-        
-        switch (range) {
-            case 'current_month':
-                return wonDate.getFullYear() === currentYear && 
-                       wonDate.getMonth() === currentMonth;
-                       
-            case 'ytd':
-                return wonDate.getFullYear() === currentYear;
-                       
-            default:
-                return true; // No date filtering
-        }
-    });
-}
-
-// Calculate specific metric - FIXED
-function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam) {
-    const wonOpportunities = opportunities.filter(opp => opp.status === 'won');
-    const completedJobs = wonOpportunities.filter(opp => 
-        opp.contact?.tags?.includes('job completed')
-    );
-    
     switch (metric) {
         case 'ytd_sales_total':
+            // YTD: All won opportunities from January 1st through today
+            const ytdOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
             return {
-                value: wonOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
+                value: ytdOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
                 format: 'currency',
                 label: 'YTD Sales Total'
             };
             
         case 'monthly_sales':
+            // MTD: Only won opportunities from 1st of current month through today
+            const monthlyOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear && 
+                       wonDate.getMonth() === currentMonth;
+            });
             return {
-                value: wonOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
+                value: monthlyOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
                 format: 'currency',
                 label: 'Monthly Sales'
             };
             
         case 'goal_progress':
-            const totalSales = wonOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+            // Use YTD for goal progress calculation
+            const goalOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
+            const totalSales = goalOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
             const urlParams = new URLSearchParams(window.location.search);
             const goal = urlParams.get('range') === 'ytd' ? yearlyGoal : monthlyGoal;
             return {
@@ -149,26 +132,47 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             };
             
         case 'dig_performance':
-            const digPercentage = wonOpportunities.length > 0 
-                ? (completedJobs.length / wonOpportunities.length) * 100 
+            // Use YTD for dig performance
+            const digOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
+            const completedJobs = digOpportunities.filter(opp => 
+                opp.contact?.tags?.includes('job completed')
+            );
+            const digPercentage = digOpportunities.length > 0 
+                ? (completedJobs.length / digOpportunities.length) * 100 
                 : 0;
             return {
                 value: digPercentage,
                 format: 'percentage',
                 label: 'Dig Performance',
-                additional: `${completedJobs.length} completed / ${wonOpportunities.length} won`
+                additional: `${completedJobs.length} completed / ${digOpportunities.length} won`
             };
             
         case 'unit_sales':
+            // Use YTD for unit sales
+            const unitOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
             return {
-                value: wonOpportunities.length,
+                value: unitOpportunities.length,
                 format: 'number',
                 label: 'Unit Sales'
             };
             
         case 'average_project_sale':
-            const totalRevenue = wonOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
-            const avgSale = wonOpportunities.length > 0 ? totalRevenue / wonOpportunities.length : 0;
+            // Use YTD for average project sale
+            const avgOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
+            const totalRevenue = avgOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+            const avgSale = avgOpportunities.length > 0 ? totalRevenue / avgOpportunities.length : 0;
             return {
                 value: avgSale,
                 format: 'currency',
@@ -176,7 +180,7 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             };
             
         case 'lead_generation':
-            // For lead generation, use ALL opportunities for this designer
+            // For lead generation, use ALL opportunities for this designer (no date filter)
             const allOpps = data.opportunities || [];
             const filteredLeads = designerId && !isTeam 
                 ? allOpps.filter(opp => opp.assignedTo === designerId)
