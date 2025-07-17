@@ -1,4 +1,40 @@
-/* styles.css - Complete Dashboard & Widget Styling */
+/* Enhanced styles.css - Complete Dashboard & Widget Styling with Goal-Based Colors */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Brand Colors */
+    --brand-primary: #1a365d;
+    --brand-secondary: #2d3748;
+    --brand-accent: #4a5568;
+    
+    /* Performance Colors */
+    --success-green: #10b981;
+    --success-green-light: #d1fae5;
+    --warning-yellow: #f59e0b;
+    --warning-yellow-light: #fef3c7;
+    --danger-red: #ef4444;
+    --danger-red-light: #fee2e2;
+    
+    /* Neutral Colors */
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
 
 * {
     margin: 0;
@@ -7,13 +43,13 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    color: #333;
+    color: var(--gray-800);
     line-height: 1.6;
     margin: 0;
-    padding: 0;
+    padding: 2rem;
 }
 
 /* Header */
@@ -63,152 +99,298 @@ main {
 }
 
 /* ======================
-   INDIVIDUAL WIDGET STYLES
+   ENHANCED WIDGET STYLES
    ====================== */
 
 /* Widget container for individual metric widgets */
 .widget {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 2rem;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2.5rem;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-xl);
     width: 100%;
-    min-width: 320px;
-    max-width: none;
+    max-width: 500px;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
-    margin: 0;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--gray-100);
+    transition: all 0.3s ease;
 }
 
+.widget:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* WTX Logo */
+.widget::after {
+    content: 'WTX';
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-md);
+}
+
+/* Performance Indicator Bar */
 .widget::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    height: 6px;
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    border-radius: 20px 20px 0 0;
+    transition: all 0.3s ease;
+}
+
+/* Performance-based colors for indicator bar */
+.widget.excellent::before {
+    background: linear-gradient(90deg, var(--success-green) 0%, #059669 100%);
+}
+
+.widget.good::before {
+    background: linear-gradient(90deg, var(--warning-yellow) 0%, #d97706 100%);
+}
+
+.widget.needs-improvement::before {
+    background: linear-gradient(90deg, var(--danger-red) 0%, #dc2626 100%);
 }
 
 .widget .label {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: #6b7280;
+    font-weight: 700;
+    color: var(--gray-500);
     margin-bottom: 1rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .widget .value {
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     font-weight: 900;
-    color: #059669;
+    color: var(--brand-primary);
     margin-bottom: 0.8rem;
     line-height: 1;
-    min-height: 2.5rem;
+    min-height: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+/* Performance-based colors for values */
+.widget .value.excellent {
+    background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.widget .value.good {
+    background: linear-gradient(135deg, var(--warning-yellow) 0%, #d97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.widget .value.needs-improvement {
+    background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .widget .value.loading {
-    color: #ccc;
+    color: var(--gray-400);
     background: none;
-    -webkit-text-fill-color: #ccc;
+    -webkit-text-fill-color: var(--gray-400);
     animation: pulse 1.5s ease-in-out infinite;
 }
 
 .widget .value.error {
-    color: #cc6666;
+    color: var(--danger-red);
     background: none;
-    -webkit-text-fill-color: #cc6666;
+    -webkit-text-fill-color: var(--danger-red);
     font-size: 2rem;
 }
 
+/* Performance Badge */
+.performance-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid white;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.widget.excellent .performance-badge,
+.widget.good .performance-badge,
+.widget.needs-improvement .performance-badge {
+    opacity: 1;
+}
+
+.widget.excellent .performance-badge {
+    background: var(--success-green);
+    color: white;
+}
+
+.widget.good .performance-badge {
+    background: var(--warning-yellow);
+    color: white;
+}
+
+.widget.needs-improvement .performance-badge {
+    background: var(--danger-red);
+    color: white;
+}
+
 .widget .additional {
-    font-size: 0.9rem;
-    color: #888;
+    font-size: 0.95rem;
+    color: var(--gray-600);
     margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border-left: 4px solid var(--brand-primary);
     display: none;
 }
 
 .widget .designer-name {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #374151;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-primary);
     margin-bottom: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    background: #f9fafb;
-    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    background: var(--gray-50);
+    border-radius: 8px;
     display: inline-block;
 }
 
 .widget .last-updated {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--gray-400);
     margin-top: 0.8rem;
+    font-weight: 500;
 }
 
 .widget .error {
-    color: #cc6666;
+    color: var(--danger-red);
     font-size: 0.9rem;
     margin-top: 1rem;
-    padding: 0.5rem;
-    background: #fdf2f2;
+    padding: 1rem;
+    background: var(--danger-red-light);
     border-radius: 8px;
+    border-left: 4px solid var(--danger-red);
     display: none;
 }
 
-/* Metric-specific styling */
-.widget[data-metric="goal_progress"] .value {
-    color: #2563eb;
+/* Goal Progress Bar */
+.goal-progress {
+    margin: 1.5rem 0;
 }
 
-.widget[data-metric="dig_performance"] .value {
-    color: #059669;
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--gray-200);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 0.5rem;
 }
 
-.widget[data-metric="unit_sales"] .value {
-    color: #7c3aed;
+.progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    transition: width 1s ease-in-out;
+    position: relative;
+    width: 0%;
 }
 
-.widget[data-metric="ytd_sales_total"] .value {
-    color: #dc2626;
+.widget.excellent .progress-fill {
+    background: linear-gradient(90deg, var(--success-green) 0%, #059669 100%);
 }
 
-.widget[data-metric="monthly_sales"] .value {
-    color: #ea580c;
+.widget.good .progress-fill {
+    background: linear-gradient(90deg, var(--warning-yellow) 0%, #d97706 100%);
 }
 
-.widget[data-metric="average_project_sale"] .value {
-    color: #0891b2;
+.widget.needs-improvement .progress-fill {
+    background: linear-gradient(90deg, var(--danger-red) 0%, #dc2626 100%);
 }
 
-.widget[data-metric="lead_generation"] .value {
-    color: #65a30d;
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.stat-item {
+    background: var(--gray-50);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Team performance styling */
 .widget[data-team="true"] {
-    border: 2px solid #2563eb;
+    border: 2px solid var(--brand-accent);
 }
 
 .widget[data-team="true"]::before {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-secondary) 100%);
 }
 
 .widget[data-team="true"] .designer-name {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-secondary) 100%);
     color: white;
-}
-
-/* Widget hover effects */
-.widget:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    transition: all 0.2s ease;
 }
 
 /* ======================
@@ -221,19 +403,19 @@ main {
     border-radius: 20px;
     padding: 2.5rem;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-lg);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .metric-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-xl);
 }
 
 #total-opportunities {
     font-size: 4rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #cc4444 0%, #aa2222 100%);
+    background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
@@ -241,13 +423,13 @@ main {
 
 .metric-card p {
     font-size: 1.3rem;
-    color: #666;
+    color: var(--gray-600);
     font-weight: 500;
     margin-bottom: 0.5rem;
 }
 
 .metric-card small {
-    color: #999;
+    color: var(--gray-400);
     font-size: 0.9rem;
 }
 
@@ -272,7 +454,7 @@ section h3 {
     border-radius: 15px;
     padding: 2rem;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -290,23 +472,23 @@ section h3 {
 
 .status-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .status-card.open {
-    --status-color: #6b8e6b;
+    --status-color: var(--success-green);
 }
 
 .status-card.won {
-    --status-color: #5a7aa5;
+    --status-color: var(--brand-primary);
 }
 
 .status-card.lost {
-    --status-color: #cc6666;
+    --status-color: var(--danger-red);
 }
 
 .status-card.abandoned {
-    --status-color: #888888;
+    --status-color: var(--gray-400);
 }
 
 .status-number {
@@ -319,14 +501,14 @@ section h3 {
 .status-label {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--gray-800);
     margin-bottom: 0.3rem;
     text-transform: capitalize;
 }
 
 .status-percentage {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--gray-600);
     font-weight: 500;
 }
 
@@ -335,7 +517,7 @@ section h3 {
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .pipeline-item {
@@ -343,7 +525,7 @@ section h3 {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--gray-100);
     transition: background-color 0.2s ease;
 }
 
@@ -352,7 +534,7 @@ section h3 {
 }
 
 .pipeline-item:hover {
-    background-color: #f8f9fa;
+    background-color: var(--gray-50);
     margin: 0 -1rem;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -361,13 +543,13 @@ section h3 {
 
 .pipeline-name {
     font-weight: 500;
-    color: #333;
+    color: var(--gray-800);
 }
 
 .pipeline-count {
     font-weight: 600;
-    color: #aa3333;
-    background: #f5f0f0;
+    color: var(--brand-primary);
+    background: var(--gray-50);
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -378,7 +560,7 @@ section h3 {
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
     overflow-x: auto;
 }
 
@@ -389,12 +571,12 @@ section h3 {
 }
 
 .opportunities-table th {
-    background: #f8f9fa;
+    background: var(--gray-50);
     padding: 1rem;
     text-align: left;
     font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e9ecef;
+    color: var(--gray-800);
+    border-bottom: 2px solid var(--gray-200);
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -402,12 +584,12 @@ section h3 {
 
 .opportunities-table td {
     padding: 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    color: #555;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-600);
 }
 
 .opportunities-table tr:hover {
-    background-color: #f8f9fa;
+    background-color: var(--gray-50);
 }
 
 .status-badge {
@@ -420,27 +602,27 @@ section h3 {
 }
 
 .status-badge.open {
-    background: #e8f0e8;
-    color: #4a6b4a;
+    background: var(--success-green-light);
+    color: var(--success-green);
 }
 
 .status-badge.won {
-    background: #e8f0f5;
-    color: #3e5a78;
+    background: var(--gray-100);
+    color: var(--brand-primary);
 }
 
 .status-badge.lost {
-    background: #f5e8e8;
-    color: #8b4545;
+    background: var(--danger-red-light);
+    color: var(--danger-red);
 }
 
 .status-badge.abandoned {
-    background: #f0f0f0;
-    color: #666666;
+    background: var(--gray-100);
+    color: var(--gray-600);
 }
 
 .table-info {
-    color: #666;
+    color: var(--gray-600);
     font-size: 0.9rem;
     text-align: center;
     margin-top: 1rem;
@@ -454,7 +636,7 @@ section h3 {
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .status-item {
@@ -462,13 +644,13 @@ section h3 {
     align-items: center;
     gap: 0.8rem;
     padding: 1rem;
-    background: #f8f9fa;
+    background: var(--gray-50);
     border-radius: 10px;
     transition: background-color 0.2s ease;
 }
 
 .status-item:hover {
-    background: #e9ecef;
+    background: var(--gray-100);
 }
 
 .status-indicator {
@@ -478,20 +660,20 @@ section h3 {
 /* Error Container */
 .error-container {
     background: white;
-    border: 2px solid #cc6666;
+    border: 2px solid var(--danger-red);
     border-radius: 15px;
     padding: 2rem;
     text-align: center;
-    box-shadow: 0 8px 25px rgba(204, 102, 102, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .error-container h3 {
-    color: #aa3333;
+    color: var(--danger-red);
     margin-bottom: 1rem;
 }
 
 .error-container p {
-    color: #666;
+    color: var(--gray-600);
     margin-bottom: 1.5rem;
 }
 
@@ -500,21 +682,21 @@ section h3 {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: linear-gradient(135deg, #aa3333 0%, #882222 100%);
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
     color: white;
     border: none;
     padding: 1rem 1.5rem;
     border-radius: 50px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(170, 51, 51, 0.3);
+    box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
     font-size: 1rem;
 }
 
 .refresh-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(170, 51, 51, 0.4);
+    box-shadow: var(--shadow-lg);
 }
 
 .refresh-btn:active {
@@ -550,6 +732,21 @@ footer {
     }
 }
 
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.widget {
+    animation: slideInUp 0.6s ease-out;
+}
+
 #dashboard-content > * {
     animation: fadeInUp 0.6s ease-out;
 }
@@ -565,6 +762,10 @@ footer {
    ====================== */
 
 @media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
     header h1 {
         font-size: 2rem;
     }
@@ -616,17 +817,26 @@ footer {
     
     /* Widget responsive */
     .widget {
-        padding: 1.5rem;
-        min-width: 280px;
-        margin: 0;
+        padding: 2rem;
+        max-width: 100%;
     }
     
     .widget .value {
-        font-size: 2rem;
-        min-height: 2rem;
+        font-size: 2.5rem;
+        min-height: 2.5rem;
     }
     
     .widget .label {
         font-size: 0.8rem;
+    }
+    
+    .widget::after {
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
     }
 }
