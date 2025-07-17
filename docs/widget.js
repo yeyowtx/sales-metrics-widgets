@@ -1,8 +1,8 @@
-// widget.js - Complete Sales Metrics Widget Engine
-// Handles all metric calculations with designer filtering and manual goal input
+// Enhanced widget.js - Complete Sales Metrics Widget Engine with Goal-Based Colors
+// Handles all metric calculations with designer filtering and performance color coding
 
 (async () => {
-    console.log('🚀 Sales Widget Loading...');
+    console.log('🚀 Enhanced Sales Widget Loading...');
     
     // CloudFlare Worker URL
     const WORKER_URL = 'https://raspy-firefly-102f.laurencio.workers.dev';
@@ -22,6 +22,7 @@
         else if (fileName.includes('unit-sales')) metric = 'unit_sales';
         else if (fileName.includes('average-project-sale')) metric = 'average_project_sale';
         else if (fileName.includes('lead-generation')) metric = 'lead_generation';
+        else if (fileName.includes('goal-progress')) metric = 'goal_progress';
     }
     
     console.log(`🎯 Detected metric: ${metric} from filename: ${fileName}`);
@@ -68,10 +69,10 @@
         // Calculate metric based on type (each metric handles its own date filtering)
         const result = calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, designerId, isTeam);
         
-        // Display result
-        displayResult(result, metric, designerId, isTeam);
+        // Display result with enhanced styling and goal-based colors
+        displayEnhancedResult(result, metric, designerId, isTeam, monthlyGoal, yearlyGoal);
         
-        console.log('✅ Widget loaded successfully');
+        console.log('✅ Enhanced Widget loaded successfully');
         
     } catch (error) {
         console.error('❌ Widget error:', error);
@@ -96,7 +97,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             return {
                 value: ytdOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
                 format: 'currency',
-                label: 'YTD Sales Total'
+                label: 'YTD Sales Total',
+                goal: yearlyGoal,
+                dealsCount: ytdOpportunities.length
             };
             
         case 'monthly_sales':
@@ -110,7 +113,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             return {
                 value: monthlyOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0),
                 format: 'currency',
-                label: 'Monthly Sales'
+                label: 'Monthly Sales',
+                goal: monthlyGoal,
+                dealsCount: monthlyOpportunities.length
             };
             
         case 'dig_performance':
@@ -131,7 +136,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
                 value: digPercentage,
                 format: 'percentage',
                 label: 'Dig Performance',
-                additional: `${monthlyCompletedJobs.length} completed / ${monthlyDigOpportunities.length} won`
+                goal: 85, // 85% target for dig performance
+                additional: `${monthlyCompletedJobs.length} completed / ${monthlyDigOpportunities.length} won`,
+                dealsCount: monthlyDigOpportunities.length
             };
             
         case 'unit_sales':
@@ -145,7 +152,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             return {
                 value: monthlyUnitOpportunities.length,
                 format: 'number',
-                label: 'Unit Sales'
+                label: 'Unit Sales',
+                goal: 8, // 8 deals per month target
+                dealsCount: monthlyUnitOpportunities.length
             };
             
         case 'average_project_sale':
@@ -160,7 +169,9 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             return {
                 value: avgSale,
                 format: 'currency',
-                label: 'Average Project Sale'
+                label: 'Average Project Sale',
+                goal: 15000, // $15k average target
+                dealsCount: avgOpportunities.length
             };
             
         case 'lead_generation':
@@ -173,15 +184,262 @@ function calculateMetric(opportunities, metric, yearlyGoal, monthlyGoal, data, d
             return {
                 value: monthlyLeads.length,
                 format: 'number',
-                label: 'Lead Generation'
+                label: 'Lead Generation',
+                goal: 25, // 25 leads per month target
+                dealsCount: monthlyLeads.length
+            };
+            
+        case 'goal_progress':
+            // Goal Progress: Calculate YTD vs Annual Goal percentage
+            const goalProgressOpportunities = opportunities.filter(opp => {
+                if (opp.status !== 'won') return false;
+                const wonDate = new Date(opp.lastStatusChangeAt);
+                return wonDate.getFullYear() === currentYear;
+            });
+            const ytdSales = goalProgressOpportunities.reduce((sum, opp) => sum + (opp.monetaryValue || 0), 0);
+            const goalPercentage = (ytdSales / yearlyGoal) * 100;
+            return {
+                value: goalPercentage,
+                format: 'percentage',
+                label: 'Goal Progress',
+                goal: 100, // 100% is the target
+                additional: `$${ytdSales.toLocaleString()} of $${yearlyGoal.toLocaleString()} annual goal`,
+                dealsCount: goalProgressOpportunities.length,
+                actualAmount: ytdSales,
+                goalAmount: yearlyGoal
             };
             
         default:
             return {
                 value: 0,
                 format: 'number',
-                label: 'Unknown Metric'
+                label: 'Unknown Metric',
+                goal: 100,
+                dealsCount: 0
             };
+    }
+}
+
+// Enhanced display function with goal-based coloring
+function displayEnhancedResult(result, metric, designerId, isTeam, monthlyGoal, yearlyGoal) {
+    const valueElement = document.querySelector('.value');
+    const labelElement = document.querySelector('.label');
+    const additionalElement = document.querySelector('.additional');
+    const designerElement = document.querySelector('.designer-name');
+    const widgetElement = document.querySelector('.widget');
+    
+    // Calculate performance level based on goal achievement
+    const percentage = (result.value / result.goal) * 100;
+    let performanceLevel;
+    let performanceText;
+    
+    if (percentage >= 90) {
+        performanceLevel = 'excellent';
+        performanceText = 'Excellent';
+    } else if (percentage >= 70) {
+        performanceLevel = 'good';
+        performanceText = 'Good';
+    } else {
+        performanceLevel = 'needs-improvement';
+        performanceText = 'Needs Focus';
+    }
+    
+    console.log(`📊 Performance: ${performanceText} (${percentage.toFixed(1)}% of goal)`);
+    
+    // Apply performance class to widget and value
+    if (widgetElement) {
+        widgetElement.className = `widget ${performanceLevel}`;
+        widgetElement.setAttribute('data-metric', metric);
+        if (isTeam) {
+            widgetElement.setAttribute('data-team', 'true');
+        }
+    }
+    
+    if (valueElement) {
+        valueElement.textContent = formatValue(result.value, result.format);
+        valueElement.className = `value ${performanceLevel}`;
+    }
+    
+    if (labelElement) {
+        labelElement.textContent = result.label;
+    }
+    
+    // Add performance badge
+    addPerformanceBadge(widgetElement, performanceText, performanceLevel);
+    
+    // Add goal progress elements for metrics that benefit from it
+    if (['monthly_sales', 'ytd_sales_total', 'goal_progress'].includes(metric)) {
+        addGoalProgressBar(widgetElement, percentage, performanceLevel, result);
+    }
+    
+    // Add stats grid for enhanced metrics display
+    addStatsGrid(widgetElement, result, metric);
+    
+    if (additionalElement && result.additional) {
+        additionalElement.textContent = result.additional;
+        additionalElement.style.display = 'block';
+    }
+    
+    if (designerElement) {
+        if (isTeam) {
+            designerElement.textContent = 'Team Performance';
+        } else if (designerId) {
+            const designers = {
+                '1avdHsezyj8F13jdoajF': 'Bradley Marquez',
+                'yWDJbBcBXvPf1nY4Isma': 'Christian Thomas', 
+                '0esj2698VuyUgwigmnoL': 'Dylan Ervin',
+                'ENkWUp8rRf6YF3iqR9qv': 'Erick Gavaldon',
+                'kfm1oYty788FPfk1Odko': 'Laurencio Montes Jr',
+                'EM8YRRRMePDUiaRxjXoI': 'Tara Yeager',
+                'x5JTU601PUdVdpH2B9R9': 'Zach Rodriguez'
+            };
+            designerElement.textContent = designers[designerId] || 'Unknown Designer';
+        } else {
+            designerElement.textContent = 'All Designers';
+        }
+    }
+    
+    // Update last updated time
+    const lastUpdatedElement = document.querySelector('.last-updated');
+    if (lastUpdatedElement) {
+        lastUpdatedElement.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+    }
+}
+
+// Add performance badge to widget
+function addPerformanceBadge(widgetElement, performanceText, performanceLevel) {
+    if (!widgetElement) return;
+    
+    // Remove existing badge
+    const existingBadge = widgetElement.querySelector('.performance-badge');
+    if (existingBadge) {
+        existingBadge.remove();
+    }
+    
+    // Create new badge
+    const badge = document.createElement('div');
+    badge.className = 'performance-badge';
+    badge.textContent = performanceText;
+    widgetElement.appendChild(badge);
+}
+
+// Add goal progress bar to widget
+function addGoalProgressBar(widgetElement, percentage, performanceLevel, result) {
+    if (!widgetElement) return;
+    
+    // Remove existing progress
+    const existingProgress = widgetElement.querySelector('.goal-progress');
+    if (existingProgress) {
+        existingProgress.remove();
+    }
+    
+    // Create progress bar
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'goal-progress';
+    
+    progressContainer.innerHTML = `
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+            <span>Progress: <strong>${Math.round(percentage)}%</strong></span>
+            <span>Goal: <strong>${formatValue(result.goal, result.format)}</strong></span>
+        </div>
+    `;
+    
+    // Insert after value element
+    const valueElement = widgetElement.querySelector('.value');
+    if (valueElement) {
+        valueElement.parentNode.insertBefore(progressContainer, valueElement.nextSibling);
+        
+        // Animate progress bar
+        setTimeout(() => {
+            const progressFill = progressContainer.querySelector('.progress-fill');
+            if (progressFill) {
+                progressFill.style.width = `${Math.min(percentage, 100)}%`;
+            }
+        }, 500);
+    }
+}
+
+// Add stats grid to widget
+function addStatsGrid(widgetElement, result, metric) {
+    if (!widgetElement) return;
+    
+    // Remove existing stats
+    const existingStats = widgetElement.querySelector('.stats-grid');
+    if (existingStats) {
+        existingStats.remove();
+    }
+    
+    // Create stats grid
+    const statsContainer = document.createElement('div');
+    statsContainer.className = 'stats-grid';
+    
+    let stat1Label, stat1Value, stat2Label, stat2Value;
+    
+    switch (metric) {
+        case 'monthly_sales':
+        case 'ytd_sales_total':
+            stat1Label = 'Deals Won';
+            stat1Value = result.dealsCount || 0;
+            stat2Label = 'Remaining';
+            stat2Value = formatValue(Math.max(result.goal - result.value, 0), result.format);
+            break;
+        case 'goal_progress':
+            stat1Label = 'YTD Sales';
+            stat1Value = formatValue(result.actualAmount || 0, 'currency');
+            stat2Label = 'Remaining';
+            stat2Value = formatValue(Math.max((result.goalAmount || 0) - (result.actualAmount || 0), 0), 'currency');
+            break;
+        case 'lead_generation':
+            stat1Label = 'Total Leads';
+            stat1Value = result.dealsCount || 0;
+            stat2Label = 'Monthly Goal';
+            stat2Value = result.goal;
+            break;
+        case 'unit_sales':
+            stat1Label = 'Deals Closed';
+            stat1Value = result.dealsCount || 0;
+            stat2Label = 'Monthly Goal';
+            stat2Value = result.goal;
+            break;
+        case 'dig_performance':
+            stat1Label = 'Completed';
+            stat1Value = result.additional ? result.additional.split(' ')[0] : '0';
+            stat2Label = 'Total Won';
+            stat2Value = result.dealsCount || 0;
+            break;
+        case 'average_project_sale':
+            stat1Label = 'Total Deals';
+            stat1Value = result.dealsCount || 0;
+            stat2Label = 'Target Avg';
+            stat2Value = formatValue(result.goal, result.format);
+            break;
+        default:
+            stat1Label = 'Current';
+            stat1Value = formatValue(result.value, result.format);
+            stat2Label = 'Goal';
+            stat2Value = formatValue(result.goal, result.format);
+    }
+    
+    statsContainer.innerHTML = `
+        <div class="stat-item">
+            <div class="stat-value">${stat1Value}</div>
+            <div class="stat-label">${stat1Label}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">${stat2Value}</div>
+            <div class="stat-label">${stat2Label}</div>
+        </div>
+    `;
+    
+    // Insert before last-updated element
+    const lastUpdatedElement = widgetElement.querySelector('.last-updated');
+    if (lastUpdatedElement) {
+        lastUpdatedElement.parentNode.insertBefore(statsContainer, lastUpdatedElement);
+    } else {
+        widgetElement.appendChild(statsContainer);
     }
 }
 
@@ -207,50 +465,6 @@ function formatValue(value, format) {
     }
 }
 
-// Display the result
-function displayResult(result, metric, designerId, isTeam) {
-    const valueElement = document.querySelector('.value');
-    const labelElement = document.querySelector('.label');
-    const additionalElement = document.querySelector('.additional');
-    const designerElement = document.querySelector('.designer-name');
-    
-    if (valueElement) {
-        valueElement.textContent = formatValue(result.value, result.format);
-    }
-    
-    if (labelElement) {
-        labelElement.textContent = result.label;
-    }
-    
-    if (additionalElement && result.additional) {
-        additionalElement.textContent = result.additional;
-        additionalElement.style.display = 'block';
-    }
-    
-    if (designerElement) {
-        if (isTeam) {
-            designerElement.textContent = 'Team Performance';
-        } else if (designerId) {
-            const designers = {
-                '1avdHsezyj8F13jdoajF': 'Bradley Marquez',
-                'yWDJbBcBXvPf1nY4Isma': 'Christian Thomas', 
-                '0esj2698VuyUgwigmnoL': 'Dylan Ervin',
-                'ENkWUp8rRf6YF3iqR9qv': 'Erick Gavaldon',
-                'kfm1oYty788FPfk1Odko': 'Laurencio Montes Jr',
-                'EM8YRRRMePDUiaRxjXoI': 'Tara Yeager',
-                'x5JTU601PUdVdpH2B9R9': 'Zach Rodriguez'
-            };
-            designerElement.textContent = designers[designerId] || 'Unknown Designer';
-        }
-    }
-    
-    // Update last updated time
-    const lastUpdatedElement = document.querySelector('.last-updated');
-    if (lastUpdatedElement) {
-        lastUpdatedElement.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
-    }
-}
-
 // Show loading state
 function showLoading() {
     const valueElement = document.querySelector('.value');
@@ -264,6 +478,11 @@ function showLoading() {
 function showError(message) {
     const valueElement = document.querySelector('.value');
     const errorElement = document.querySelector('.error');
+    const widgetElement = document.querySelector('.widget');
+    
+    if (widgetElement) {
+        widgetElement.className = 'widget needs-improvement';
+    }
     
     if (valueElement) {
         valueElement.textContent = 'Error';
