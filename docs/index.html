@@ -1,9 +1,460 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8"><title>Sales Metrics Dashboard</title></head>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Performance Dashboard - Zach Rodriguez</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            color: #1a202c;
+        }
+        
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 2rem;
+            color: #2d3748;
+            margin: 0;
+        }
+        
+        .dashboard-header p {
+            color: #718096;
+            margin: 5px 0;
+        }
+        
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .widget {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .widget-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .widget-brand {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #2d3748;
+        }
+        
+        .widget-main {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .widget-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 10px 0;
+            line-height: 1;
+        }
+        
+        .widget-subtitle {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+        
+        .widget-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        
+        .updated-time {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
+        
+        /* Color schemes for different widgets */
+        .ytd-sales .widget-value { color: #e53e3e; }
+        .ytd-sales .progress-fill { background: linear-gradient(90deg, #e53e3e, #c53030); }
+        
+        .monthly-sales .widget-value { color: #dd6b20; }
+        .monthly-sales .progress-fill { background: linear-gradient(90deg, #dd6b20, #c05621); }
+        
+        .units-sold .widget-value { color: #e53e3e; }
+        
+        .dig-performance .widget-value { color: #718096; }
+        
+        .lead-generation .widget-value { color: #38a169; }
+        .lead-generation .progress-fill { background: linear-gradient(90deg, #38a169, #2f855a); }
+        
+        .avg-project .widget-value { color: #38a169; }
+        
+        .loading {
+            text-align: center;
+            color: #718096;
+            font-size: 1.1rem;
+            margin: 50px 0;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .debug-info {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+    </style>
+</head>
 <body>
-  <h1>GitHub Pages is working!</h1>
-  <p>If you see this, Pages is serving from docs/ correctly.</p>
-  <p><a href="ytd-sales.html" style="display: inline-block; background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">📊 YTD Sales Dashboard</a></p>
+    <div class="dashboard-header">
+        <h1>Sales Performance Dashboard</h1>
+        <p>Zach Rodriguez</p>
+        <p id="lastUpdate" class="updated-time">Loading...</p>
+    </div>
+    
+    <div id="loading" class="loading">
+        🔄 Loading dashboard data...
+    </div>
+    
+    <div id="error" class="error" style="display: none;">
+        ❌ <span id="errorMessage">Error loading data</span>
+    </div>
+    
+    <div id="debug" class="debug-info" style="display: none;">
+        <strong>Debug Info:</strong> <span id="debugInfo"></span>
+    </div>
+    
+    <div id="dashboard-content" class="widgets-grid" style="display: none;">
+        <!-- YTD Sales Widget -->
+        <div class="widget ytd-sales">
+            <div class="widget-header">
+                <div class="widget-title">YTD Sales</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value" id="ytdSalesValue">$0</div>
+                <div class="widget-subtitle">YTD SALES TOTAL</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress: <span id="ytdProgress">0</span>%</span>
+                        <span>Goal: $800,000</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ytdProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong id="ytdDealsWon">0</strong><br>
+                    <small>DEALS WON</small>
+                </div>
+                <div>
+                    <strong id="ytdRemaining">$0</strong><br>
+                    <small>REMAINING</small>
+                </div>
+                <div class="updated-time">Updated: <span id="ytdUpdate">--</span></div>
+            </div>
+        </div>
+        
+        <!-- Monthly Sales Widget -->
+        <div class="widget monthly-sales">
+            <div class="widget-header">
+                <div class="widget-title">MTD Sales</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value" id="mtdSalesValue">$0</div>
+                <div class="widget-subtitle">MONTHLY SALES</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress: <span id="mtdProgress">0</span>%</span>
+                        <span>Goal: $65,667</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="mtdProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong id="mtdDealsWon">0</strong><br>
+                    <small>DEALS WON</small>
+                </div>
+                <div>
+                    <strong id="mtdRemaining">$0</strong><br>
+                    <small>REMAINING</small>
+                </div>
+                <div class="updated-time">Updated: <span id="mtdUpdate">--</span></div>
+            </div>
+        </div>
+        
+        <!-- Units Sold Widget -->
+        <div class="widget units-sold">
+            <div class="widget-header">
+                <div class="widget-title">Units Sold</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value" id="unitsSoldValue">0</div>
+                <div class="widget-subtitle">UNIT SALES</div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong id="unitsDealsWon">0</strong><br>
+                    <small>DEALS CLOSED</small>
+                </div>
+                <div>
+                    <strong>8</strong><br>
+                    <small>MONTHLY GOAL</small>
+                </div>
+                <div class="updated-time">Updated: <span id="unitsUpdate">--</span></div>
+            </div>
+        </div>
+        
+        <!-- Dig Performance Widget -->
+        <div class="widget dig-performance">
+            <div class="widget-header">
+                <div class="widget-title">Dig Performance</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value">--</div>
+                <div class="widget-subtitle">DIG PERFORMANCE</div>
+                <div style="margin: 20px 0; color: #718096; font-style: italic;">
+                    Job Thread automation coming soon
+                </div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong>--</strong><br>
+                    <small>COMPLETED</small>
+                </div>
+                <div>
+                    <strong>--</strong><br>
+                    <small>TOTAL WON</small>
+                </div>
+                <div class="updated-time">Updated: <span id="digUpdate">--</span></div>
+            </div>
+        </div>
+        
+        <!-- Lead Generation Widget -->
+        <div class="widget lead-generation">
+            <div class="widget-header">
+                <div class="widget-title">Lead Generation</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value" id="leadGenValue">0</div>
+                <div class="widget-subtitle">LEAD GENERATION</div>
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress: <span id="leadProgress">0</span>%</span>
+                        <span>Goal: 25</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="leadProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong id="leadTotal">0</strong><br>
+                    <small>TOTAL LEADS</small>
+                </div>
+                <div>
+                    <strong>25</strong><br>
+                    <small>MONTHLY GOAL</small>
+                </div>
+                <div class="updated-time">Updated: <span id="leadUpdate">--</span></div>
+            </div>
+        </div>
+        
+        <!-- Average Project Size Widget -->
+        <div class="widget avg-project">
+            <div class="widget-header">
+                <div class="widget-title">Avg Project Size</div>
+                <div class="widget-brand">WTX</div>
+            </div>
+            <div class="widget-main">
+                <div class="widget-value" id="avgProjectValue">$0</div>
+                <div class="widget-subtitle">AVERAGE PROJECT SALE</div>
+            </div>
+            <div class="widget-footer">
+                <div>
+                    <strong id="avgTotalDeals">0</strong><br>
+                    <small>TOTAL DEALS</small>
+                </div>
+                <div>
+                    <strong>$15,000</strong><br>
+                    <small>TARGET AVG</small>
+                </div>
+                <div class="updated-time">Updated: <span id="avgUpdate">--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔧 REPLACE THIS WITH YOUR ACTUAL CLOUDFLARE WORKER URL
+        const WORKER_URL = 'https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev/';
+        
+        // Goals
+        const GOALS = {
+            ytdSales: 800000,
+            monthlySales: 65667,
+            monthlyLeads: 25
+        };
+        
+        async function loadDashboardData() {
+            try {
+                console.log('Fetching data from:', WORKER_URL);
+                
+                const response = await fetch(WORKER_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (data.success) {
+                    renderDashboard(data);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('dashboard-content').style.display = 'grid';
+                    
+                    // Show debug info
+                    document.getElementById('debugInfo').textContent = 
+                        `${data.debug.filteredOpportunities} opportunities in pipeline | Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+                    document.getElementById('debug').style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('errorMessage').textContent = `${error.message}. Check console for details.`;
+            }
+        }
+        
+        function renderDashboard(data) {
+            const { metrics, timeframe } = data;
+            const currentTime = new Date().toLocaleString();
+            
+            document.getElementById('lastUpdate').textContent = 
+                `${timeframe.monthName} ${timeframe.year} | Last Updated: ${currentTime}`;
+            
+            // YTD Sales Widget
+            const ytdProgress = (metrics.ytd.sales / GOALS.ytdSales) * 100;
+            const ytdRemaining = Math.max(0, GOALS.ytdSales - metrics.ytd.sales);
+            
+            document.getElementById('ytdSalesValue').textContent = `$${metrics.ytd.sales.toLocaleString()}`;
+            document.getElementById('ytdProgress').textContent = Math.round(ytdProgress);
+            document.getElementById('ytdDealsWon').textContent = metrics.ytd.deals;
+            document.getElementById('ytdRemaining').textContent = `$${ytdRemaining.toLocaleString()}`;
+            document.getElementById('ytdUpdate').textContent = currentTime.split(' ')[1];
+            document.getElementById('ytdProgressBar').style.width = `${Math.min(ytdProgress, 100)}%`;
+            
+            // Monthly Sales Widget
+            const mtdProgress = (metrics.monthly.sales / GOALS.monthlySales) * 100;
+            const mtdRemaining = Math.max(0, GOALS.monthlySales - metrics.monthly.sales);
+            
+            document.getElementById('mtdSalesValue').textContent = `$${metrics.monthly.sales.toLocaleString()}`;
+            document.getElementById('mtdProgress').textContent = Math.round(mtdProgress);
+            document.getElementById('mtdDealsWon').textContent = metrics.monthly.deals;
+            document.getElementById('mtdRemaining').textContent = `$${mtdRemaining.toLocaleString()}`;
+            document.getElementById('mtdUpdate').textContent = currentTime.split(' ')[1];
+            document.getElementById('mtdProgressBar').style.width = `${Math.min(mtdProgress, 100)}%`;
+            
+            // Units Sold Widget (same as monthly deals)
+            document.getElementById('unitsSoldValue').textContent = metrics.monthly.deals;
+            document.getElementById('unitsDealsWon').textContent = metrics.monthly.deals;
+            document.getElementById('unitsUpdate').textContent = currentTime.split(' ')[1];
+            
+            // Lead Generation Widget
+            const leadProgress = (metrics.monthly.leadsAssigned / GOALS.monthlyLeads) * 100;
+            
+            document.getElementById('leadGenValue').textContent = metrics.monthly.leadsAssigned;
+            document.getElementById('leadProgress').textContent = Math.round(leadProgress);
+            document.getElementById('leadTotal').textContent = metrics.monthly.leadsAssigned;
+            document.getElementById('leadUpdate').textContent = currentTime.split(' ')[1];
+            document.getElementById('leadProgressBar').style.width = `${Math.min(leadProgress, 100)}%`;
+            
+            // Average Project Size Widget
+            document.getElementById('avgProjectValue').textContent = `$${metrics.avgProjectSize.toLocaleString()}`;
+            document.getElementById('avgTotalDeals').textContent = metrics.ytd.deals;
+            document.getElementById('avgUpdate').textContent = currentTime.split(' ')[1];
+            
+            // Dig Performance (placeholder)
+            document.getElementById('digUpdate').textContent = currentTime.split(' ')[1];
+        }
+        
+        // Load data on page load
+        loadDashboardData();
+        
+        // Refresh every 5 minutes
+        setInterval(loadDashboardData, 5 * 60 * 1000);
+    </script>
 </body>
 </html>
